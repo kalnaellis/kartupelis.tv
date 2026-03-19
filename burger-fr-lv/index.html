@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>French to Latvian Burger Builder</title>
+  <style>
+    :root {
+      --paper: #fff8e9;
+      --ink: #1e2233;
+      --blue: #3558d6;
+      --red: #d4514f;
+      --yellow: #f0cf4e;
+      --green: #3e9b57;
+      --purple: #7a56c7;
+      --panel-shadow: 0 18px 50px rgba(0, 0, 0, 0.16);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Trebuchet MS", "Comic Sans MS", system-ui, sans-serif;
+      background: linear-gradient(180deg, #cfe9ff 0%, #f8f0dc 58%, #f4dfb3 100%);
+      color: var(--ink);
+    }
+
+    #app {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    canvas#scene {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .ui {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: grid;
+      grid-template-columns: minmax(310px, 430px) 1fr;
+      padding: 18px;
+      gap: 18px;
+    }
+
+    .panel {
+      pointer-events: auto;
+      align-self: start;
+      background: radial-gradient(circle at top left, rgba(255,255,255,0.65), rgba(255,255,255,0.2)), var(--paper);
+      border: 3px solid rgba(49, 35, 17, 0.15);
+      border-radius: 24px;
+      box-shadow: var(--panel-shadow);
+      padding: 18px 18px 16px;
+      position: relative;
+      backdrop-filter: blur(7px);
+    }
+
+    .paper-noise::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(rgba(80, 65, 40, 0.05) 0.8px, transparent 0.9px),
+        radial-gradient(rgba(80, 65, 40, 0.04) 0.7px, transparent 0.8px);
+      background-size: 24px 24px, 31px 31px;
+      background-position: 0 0, 13px 9px;
+      border-radius: inherit;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .header-row,
+    .toolbar,
+    .menu,
+    .status-box,
+    .footer-line {
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .hand-title {
+      font-family: "Segoe Print", "Comic Sans MS", cursive;
+      font-size: clamp(1.9rem, 2.3vw, 2.45rem);
+      line-height: 0.92;
+      margin: 2px 0 2px;
+      color: #2846a6;
+      letter-spacing: 0.4px;
+    }
+
+    .mini-sub {
+      font-family: "Segoe Print", "Comic Sans MS", cursive;
+      font-size: 0.95rem;
+      color: rgba(34, 37, 61, 0.74);
+      margin-top: 6px;
+    }
+
+    .tiny-burger {
+      width: 76px;
+      height: 76px;
+      flex: 0 0 auto;
+      margin-top: 4px;
+      filter: drop-shadow(0 7px 10px rgba(0,0,0,0.12));
+    }
+
+    .crayon-line {
+      height: 10px;
+      border-radius: 999px;
+      margin: 8px 0 14px;
+      background:
+        linear-gradient(90deg,
+          transparent 0%,
+          transparent 2%,
+          var(--green) 2%,
+          var(--green) 47%,
+          var(--red) 47%,
+          var(--red) 73%,
+          var(--yellow) 73%,
+          var(--yellow) 98%,
+          transparent 98%);
+      filter: saturate(0.9) blur(0.15px);
+      opacity: 0.95;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 0.96rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+      box-shadow: 0 6px 18px rgba(20, 20, 20, 0.13);
+    }
+
+    button:hover { transform: translateY(-1px) scale(1.01); }
+    button:active { transform: translateY(1px) scale(0.99); }
+
+    .lang-btn {
+      background: linear-gradient(180deg, #fffaf0, #f6edcf);
+      color: #513e19;
+      min-width: 82px;
+    }
+
+    .lang-btn.active {
+      outline: 3px solid rgba(53, 88, 214, 0.35);
+      box-shadow: 0 8px 20px rgba(53, 88, 214, 0.22);
+    }
+
+    .mode-btn {
+      background: linear-gradient(180deg, #eff7ff, #dcecff);
+      color: #24418f;
+    }
+
+    .mode-btn.active {
+      outline: 3px solid rgba(53, 88, 214, 0.28);
+    }
+
+    .speak-btn {
+      background: linear-gradient(180deg, #fff9ef, #ffe4b8);
+      color: #7a4e09;
+    }
+
+    .menu {
+      display: grid;
+      gap: 12px;
+      margin: 14px 0 14px;
+    }
+
+    .ingredient-card {
+      display: grid;
+      grid-template-columns: 72px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      border-radius: 20px;
+      border: 3px solid rgba(31, 31, 31, 0.08);
+      background: rgba(255,255,255,0.58);
+      padding: 10px 12px;
+      cursor: pointer;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      user-select: none;
+    }
+
+    .ingredient-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+    }
+
+    .ingredient-card.selected {
+      border-color: rgba(36, 65, 143, 0.28);
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .ingredient-card.quiz-target {
+      animation: pulse 1s infinite;
+    }
+
+    .ingredient-icon {
+      width: 100%;
+      height: 56px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.48));
+      border: 2px solid rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .word-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .word-main {
+      font-size: 1.08rem;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+
+    .word-sub {
+      font-size: 0.87rem;
+      opacity: 0.78;
+    }
+
+    .tap-pill {
+      background: linear-gradient(180deg, #fff, #edf2ff);
+      color: #3d53a8;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 8px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+      box-shadow: inset 0 0 0 2px rgba(61,83,168,0.1);
+    }
+
+    .status-box {
+      background: rgba(255,255,255,0.62);
+      border-radius: 18px;
+      border: 2px dashed rgba(37, 55, 105, 0.18);
+      padding: 12px 14px;
+      min-height: 104px;
+    }
+
+    .status-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      opacity: 0.62;
+      margin-bottom: 6px;
+      font-weight: 800;
+    }
+
+    .status-message {
+      font-size: 1rem;
+      line-height: 1.38;
+      font-weight: 700;
+      min-height: 2.8em;
+    }
+
+    .score-line {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      opacity: 0.8;
+      font-weight: 700;
+    }
+
+    .footer-line {
+      margin-top: 12px;
+      font-size: 0.88rem;
+      opacity: 0.78;
+      line-height: 1.4;
+    }
+
+    .overlay-tip {
+      position: absolute;
+      right: 18px;
+      bottom: 18px;
+      pointer-events: none;
+      background: rgba(255,255,255,0.78);
+      border: 2px solid rgba(32, 44, 80, 0.08);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 800;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+      color: #2846a6;
+    }
+
+    .drawn-squiggle {
+      position: absolute;
+      right: 80px;
+      bottom: 76px;
+      width: 90px;
+      height: 40px;
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.015); }
+      100% { transform: scale(1); }
+    }
+
+    @media (max-width: 980px) {
+      .ui {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+      }
+
+      .panel {
+        max-width: none;
+      }
+
+      .overlay-tip,
+      .drawn-squiggle {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      html, body {
+        overflow: auto;
+      }
+
+      #app {
+        min-height: 100vh;
+      }
+
+      canvas#scene {
+        position: fixed;
+      }
+
+      .ui {
+        padding: 12px;
+      }
+
+      .ingredient-card {
+        grid-template-columns: 58px 1fr;
+      }
+
+      .tap-pill {
+        grid-column: 1 / -1;
+        justify-self: start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <canvas id="scene"></canvas>
+
+    <div class="ui">
+      <div class="panel paper-noise">
+        <div class="header-row">
+          <div>
+            <div class="hand-title">Le Burger</div>
+            <div class="crayon-line"></div>
+            <div class="mini-sub" id="subtitleText">Click the menu and the burger to learn words.</div>
+          </div>
+          <svg class="tiny-burger" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <ellipse cx="60" cy="36" rx="36" ry="18" fill="#e9d2ab" stroke="#6d5a42" stroke-width="3"/>
+            <rect x="29" y="47" width="62" height="7" rx="4" fill="#2f8e4e"/>
+            <rect x="26" y="54" width="68" height="8" rx="4" fill="#d24e4a"/>
+            <rect x="30" y="63" width="60" height="7" rx="4" fill="#f0cf4e"/>
+            <ellipse cx="60" cy="78" rx="38" ry="15" fill="#e8d1ad" stroke="#6d5a42" stroke-width="3"/>
+          </svg>
+        </div>
+
+        <div class="toolbar">
+          <button class="lang-btn active" id="frBtn">FR</button>
+          <button class="lang-btn" id="lvBtn">LV</button>
+          <button class="mode-btn active" id="learnBtn">Learn</button>
+          <button class="mode-btn" id="quizBtn">Quiz</button>
+          <button class="speak-btn" id="speakAllBtn">Speak</button>
+        </div>
+
+        <div class="menu" id="menu"></div>
+
+        <div class="status-box">
+          <div class="status-title" id="statusTitle">Burger notebook</div>
+          <div class="status-message" id="statusMessage">Choose a word to begin.</div>
+          <div class="score-line" id="scoreLine">Score: 0 / 0</div>
+        </div>
+
+        <div class="footer-line" id="footerText">
+          Tap the menu cards or click the floating burger layers. The drawing-style colors follow your sketch like a tiny crayon lesson page.
+        </div>
+      </div>
+    </div>
+
+    <svg class="drawn-squiggle" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M8 26 C 22 10, 38 32, 54 20 S 85 12, 110 24" fill="none" stroke="#3e9b57" stroke-width="4" stroke-linecap="round"/>
+    </svg>
+    <div class="overlay-tip" id="overlayTip">Click the burger 🍔</div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+    const dictionary = [
+      {
+        id: 'pain',
+        fr: 'pain',
+        lv: 'maizīte',
+        categoryFr: 'bun',
+        categoryLv: 'bulciņa',
+        color: '#ead0a7',
+        layer: 'bun'
+      },
+      {
+        id: 'salade',
+        fr: 'salade',
+        lv: 'salāti',
+        categoryFr: 'lettuce',
+        categoryLv: 'salātlapa',
+        color: '#3e9b57',
+        layer: 'lettuce'
+      },
+      {
+        id: 'viande',
+        fr: 'viande',
+        lv: 'gaļa',
+        categoryFr: 'meat',
+        categoryLv: 'gaļa',
+        color: '#6d3f2c',
+        layer: 'meat'
+      },
+      {
+        id: 'fromage',
+        fr: 'fromage',
+        lv: 'siers',
+        categoryFr: 'cheese',
+        categoryLv: 'siers',
+        color: '#f0cf4e',
+        layer: 'cheese'
+      },
+      {
+        id: 'burger',
+        fr: 'le burger',
+        lv: 'burgers',
+        categoryFr: 'whole burger',
+        categoryLv: 'viss burgers',
+        color: '#d4514f',
+        layer: 'whole'
+      }
+    ];
+
+    const ui = {
+      menu: document.getElementById('menu'),
+      subtitle: document.getElementById('subtitleText'),
+      statusTitle: document.getElementById('statusTitle'),
+      statusMessage: document.getElementById('statusMessage'),
+      scoreLine: document.getElementById('scoreLine'),
+      footerText: document.getElementById('footerText'),
+      overlayTip: document.getElementById('overlayTip'),
+      frBtn: document.getElementById('frBtn'),
+      lvBtn: document.getElementById('lvBtn'),
+      learnBtn: document.getElementById('learnBtn'),
+      quizBtn: document.getElementById('quizBtn'),
+      speakAllBtn: document.getElementById('speakAllBtn')
+    };
+
+    const state = {
+      lang: 'fr',
+      mode: 'learn',
+      selected: 'burger',
+      quizTarget: null,
+      score: 0,
+      rounds: 0
+    };
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xbfe3ff);
+    scene.fog = new THREE.Fog(0xbfe3ff, 12, 26);
+
+    const canvas = document.getElementById('scene');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+
+    const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 2.8, 8.2);
+
+    const controls = new OrbitControls(camera, canvas);
+    controls.enablePan = false;
+    controls.enableDamping = true;
+    controls.minDistance = 5.6;
+    controls.maxDistance = 11;
+    controls.maxPolarAngle = Math.PI * 0.48;
+    controls.target.set(0, 1.6, 0);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.25);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    keyLight.position.set(4, 8, 5);
+    keyLight.castShadow = true;
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0xffefc2, 0.9);
+    fillLight.position.set(-6, 4, 2);
+    scene.add(fillLight);
+
+    const ground = new THREE.Mesh(
+      new THREE.CircleGeometry(8, 64),
+      new THREE.MeshStandardMaterial({ color: 0xf1d7aa, roughness: 1 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -1.3;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    const scribbleRing = new THREE.Mesh(
+      new THREE.TorusGeometry(2.8, 0.06, 12, 100),
+      new THREE.MeshStandardMaterial({ color: 0x6a8fe9, roughness: 0.6, metalness: 0.1 })
+    );
+    scribbleRing.rotation.x = Math.PI / 2;
+    scribbleRing.position.y = -1.1;
+    scene.add(scribbleRing);
+
+    const burgerGroup = new THREE.Group();
+    burgerGroup.position.y = 0.2;
+    scene.add(burgerGroup);
+
+    const burgerMeshes = [];
+
+    function makeRoundedBun(height, yPos, scale = 1) {
+      const geo = new THREE.SphereGeometry(1.65 * scale, 36, 36, 0, Math.PI * 2, 0, Math.PI / 2.15);
+      const mat = new THREE.MeshStandardMaterial({ color: 0xe7c898, roughness: 0.85 });
+      const bun = new THREE.Mesh(geo, mat);
+      bun.scale.y = height;
+      bun.position.y = yPos;
+      bun.castShadow = true;
+      bun.receiveShadow = true;
+      return bun;
+    }
+
+    const bottomBun = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.78, 1.95, 0.55, 40),
+      new THREE.MeshStandardMaterial({ color: 0xe2c08f, roughness: 0.92 })
+    );
+    bottomBun.position.y = -0.85;
+    bottomBun.castShadow = true;
+    bottomBun.userData.wordId = 'pain';
+    burgerGroup.add(bottomBun);
+    burgerMeshes.push(bottomBun);
+
+    const meat = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.55, 1.7, 0.34, 40),
+      new THREE.MeshStandardMaterial({ color: 0x6d3f2c, roughness: 0.95 })
+    );
+    meat.position.y = -0.33;
+    meat.castShadow = true;
+    meat.userData.wordId = 'viande';
+    burgerGroup.add(meat);
+    burgerMeshes.push(meat);
+
+    const cheese = new THREE.Mesh(
+      new THREE.BoxGeometry(2.35, 0.09, 2.35),
+      new THREE.MeshStandardMaterial({ color: 0xf0cf4e, roughness: 0.8 })
+    );
+    cheese.position.y = -0.08;
+    cheese.rotation.y = Math.PI / 4;
+    cheese.castShadow = true;
+    cheese.userData.wordId = 'fromage';
+    burgerGroup.add(cheese);
+    burgerMeshes.push(cheese);
+
+    const lettuceShape = new THREE.Shape();
+    lettuceShape.moveTo(-1.8, 0);
+    lettuceShape.bezierCurveTo(-1.2, 0.35, -0.7, -0.3, -0.15, 0.18);
+    lettuceShape.bezierCurveTo(0.25, 0.45, 0.9, -0.2, 1.5, 0.25);
+    lettuceShape.bezierCurveTo(1.7, 0.35, 1.95, 0.05, 1.85, -0.12);
+    lettuceShape.bezierCurveTo(1.2, -0.35, 0.5, 0.2, -0.2, -0.25);
+    lettuceShape.bezierCurveTo(-0.8, -0.55, -1.3, 0.2, -1.8, 0);
+
+    const lettuceGeo = new THREE.ExtrudeGeometry(lettuceShape, {
+      depth: 0.1,
+      bevelEnabled: false,
+      steps: 1
+    });
+    const lettuce = new THREE.Mesh(
+      lettuceGeo,
+      new THREE.MeshStandardMaterial({ color: 0x3e9b57, roughness: 0.95 })
+    );
+    lettuce.rotation.x = -Math.PI / 2;
+    lettuce.position.set(0, 0.12, 0.95);
+    lettuce.castShadow = true;
+    lettuce.userData.wordId = 'salade';
+    burgerGroup.add(lettuce);
+    burgerMeshes.push(lettuce);
+
+    const topBun = makeRoundedBun(0.78, 0.88, 1);
+    topBun.userData.wordId = 'pain';
+    burgerGroup.add(topBun);
+    burgerMeshes.push(topBun);
+
+    const sesameGeo = new THREE.SphereGeometry(0.06, 10, 10);
+    for (let i = 0; i < 18; i++) {
+      const sesame = new THREE.Mesh(
+        sesameGeo,
+        new THREE.MeshStandardMaterial({ color: 0xfff6da, roughness: 0.9 })
+      );
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 0.25 + Math.random() * 1.05;
+      sesame.position.set(Math.cos(angle) * radius, 1.45 + Math.random() * 0.18, Math.sin(angle) * radius * 0.72);
+      sesame.scale.set(1.2, 0.7, 1.5);
+      burgerGroup.add(sesame);
+    }
+
+    const burgerAura = new THREE.Mesh(
+      new THREE.TorusGeometry(2.25, 0.08, 14, 120),
+      new THREE.MeshStandardMaterial({ color: 0xd4514f, emissive: 0x5a1210, roughness: 0.5 })
+    );
+    burgerAura.rotation.x = Math.PI / 2;
+    burgerAura.position.y = 0.2;
+    burgerAura.userData.wordId = 'burger';
+    burgerGroup.add(burgerAura);
+    burgerMeshes.push(burgerAura);
+
+    const floatingLabels = new THREE.Group();
+    scene.add(floatingLabels);
+
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+
+    function getWord(entry) {
+      return state.lang === 'fr' ? entry.fr : entry.lv;
+    }
+
+    function getSub(entry) {
+      return state.lang === 'fr' ? entry.categoryFr : entry.categoryLv;
+    }
+
+    function getVoiceLang() {
+      return state.lang === 'fr' ? 'fr-FR' : 'lv-LV';
+    }
+
+    function speakText(text) {
+      if (!('speechSynthesis' in window)) return;
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = getVoiceLang();
+      utter.rate = state.lang === 'fr' ? 0.92 : 0.95;
+      utter.pitch = 1.03;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utter);
+    }
+
+    function drawIngredientIcon(entry) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'ingredient-icon';
+
+      if (entry.id === 'pain') {
+        wrapper.innerHTML = '<svg viewBox="0 0 90 56" width="62" height="42"><ellipse cx="45" cy="24" rx="28" ry="14" fill="#e8d1ad" stroke="#6d5a42" stroke-width="3"/></svg>';
+      } else if (entry.id === 'salade') {
+        wrapper.innerHTML = '<svg viewBox="0 0 90 56" width="64" height="40"><path d="M12 30 C 22 16, 34 36, 45 24 S 66 16, 80 28" fill="none" stroke="#3e9b57" stroke-width="8" stroke-linecap="round"/></svg>';
+      } else if (entry.id === 'viande') {
+        wrapper.innerHTML = '<svg viewBox="0 0 90 56" width="64" height="36"><rect x="18" y="20" rx="10" ry="10" width="54" height="18" fill="#6d3f2c"/></svg>';
+      } else if (entry.id === 'fromage') {
+        wrapper.innerHTML = '<svg viewBox="0 0 90 56" width="64" height="36"><path d="M18 34 L68 34 L58 18 L10 18 Z" fill="#f0cf4e" stroke="#d5b632" stroke-width="2"/></svg>';
+      } else {
+        wrapper.innerHTML = '<svg viewBox="0 0 90 56" width="68" height="40"><ellipse cx="45" cy="15" rx="24" ry="10" fill="#ead0a7"/><rect x="21" y="24" width="48" height="5" rx="2" fill="#3e9b57"/><rect x="18" y="29" width="54" height="6" rx="3" fill="#d4514f"/><rect x="22" y="36" width="46" height="5" rx="2" fill="#f0cf4e"/><ellipse cx="45" cy="45" rx="26" ry="9" fill="#ead0a7"/></svg>';
+      }
+
+      return wrapper;
+    }
+
+    function makeCard(entry) {
+      const card = document.createElement('div');
+      card.className = 'ingredient-card';
+      card.dataset.id = entry.id;
+      card.appendChild(drawIngredientIcon(entry));
+
+      const wordBlock = document.createElement('div');
+      wordBlock.className = 'word-block';
+      const main = document.createElement('div');
+      main.className = 'word-main';
+      main.textContent = getWord(entry);
+      const sub = document.createElement('div');
+      sub.className = 'word-sub';
+      sub.textContent = getSub(entry);
+      wordBlock.append(main, sub);
+      card.appendChild(wordBlock);
+
+      const pill = document.createElement('div');
+      pill.className = 'tap-pill';
+      pill.textContent = state.lang === 'fr' ? 'Click' : 'Spied';
+      card.appendChild(pill);
+
+      card.addEventListener('click', () => handleSelection(entry.id, true));
+      return card;
+    }
+
+    function updateStatus(message) {
+      ui.statusMessage.textContent = message;
+      ui.scoreLine.textContent = `Score: ${state.score} / ${state.rounds}`;
+    }
+
+    function getEntryById(id) {
+      return dictionary.find(item => item.id === id);
+    }
+
+    function renderMenu() {
+      ui.menu.innerHTML = '';
+      dictionary.forEach(entry => ui.menu.appendChild(makeCard(entry)));
+      refreshSelectedCard();
+    }
+
+    function refreshSelectedCard() {
+      const cards = [...document.querySelectorAll('.ingredient-card')];
+      cards.forEach(card => {
+        card.classList.toggle('selected', card.dataset.id === state.selected && state.mode === 'learn');
+        card.classList.toggle('quiz-target', card.dataset.id === state.quizTarget && state.mode === 'quiz');
+      });
+    }
+
+    function setLanguage(lang) {
+      state.lang = lang;
+      ui.frBtn.classList.toggle('active', lang === 'fr');
+      ui.lvBtn.classList.toggle('active', lang === 'lv');
+      ui.subtitle.textContent = lang === 'fr'
+        ? 'Clique le menu et le burger pour apprendre les mots.'
+        : 'Spied uz izvēlni un burgeru, lai mācītos vārdus.';
+      ui.statusTitle.textContent = lang === 'fr' ? 'Carnet du burger' : 'Burgera piezīmes';
+      ui.footerText.textContent = lang === 'fr'
+        ? 'Touchez les cartes du menu ou cliquez sur les couches du burger flottant. Les couleurs suivent le dessin comme une petite page au crayon.'
+        : 'Spied uz izvēlnes kartītēm vai uz peldošā burgera kārtām. Krāsas seko zīmējumam kā maza krītiņu mācību lapa.';
+      ui.overlayTip.textContent = lang === 'fr' ? 'Clique le burger 🍔' : 'Spied uz burgera 🍔';
+      ui.speakAllBtn.textContent = lang === 'fr' ? 'Parler' : 'Runāt';
+      ui.learnBtn.textContent = lang === 'fr' ? 'Learn' : 'Mācīties';
+      ui.quizBtn.textContent = lang === 'fr' ? 'Quiz' : 'Tests';
+      renderMenu();
+      if (state.mode === 'learn') {
+        const entry = getEntryById(state.selected);
+        updateStatus(lang === 'fr'
+          ? `Mot choisi: ${entry.fr} • ${entry.categoryFr}`
+          : `Izvēlēts vārds: ${entry.lv} • ${entry.categoryLv}`);
+      } else {
+        updateQuizPrompt();
+      }
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      ui.learnBtn.classList.toggle('active', mode === 'learn');
+      ui.quizBtn.classList.toggle('active', mode === 'quiz');
+
+      if (mode === 'quiz') {
+        nextQuizRound();
+      } else {
+        state.quizTarget = null;
+        const entry = getEntryById(state.selected);
+        updateStatus(state.lang === 'fr'
+          ? `Mot choisi: ${entry.fr} • ${entry.categoryFr}`
+          : `Izvēlēts vārds: ${entry.lv} • ${entry.categoryLv}`);
+      }
+      refreshSelectedCard();
+    }
+
+    function nextQuizRound() {
+      const options = dictionary.filter(item => item.id !== 'burger');
+      const target = options[Math.floor(Math.random() * options.length)];
+      state.quizTarget = target.id;
+      updateQuizPrompt();
+      refreshSelectedCard();
+    }
+
+    function updateQuizPrompt() {
+      const target = getEntryById(state.quizTarget || 'pain');
+      const ask = state.lang === 'fr'
+        ? `Trouve: ${target.lv}`
+        : `Atrodi: ${target.fr}`;
+      updateStatus(ask);
+    }
+
+    function bounceObject(wordId) {
+      burgerMeshes.forEach(mesh => {
+        if (mesh.userData.wordId === wordId) {
+          mesh.scale.setScalar(1.08);
+          setTimeout(() => mesh.scale.setScalar(1), 180);
+        }
+      });
+    }
+
+    function handleSelection(id, shouldSpeak = false) {
+      const entry = getEntryById(id);
+      if (!entry) return;
+
+      if (state.mode === 'learn') {
+        state.selected = id;
+        refreshSelectedCard();
+        updateStatus(state.lang === 'fr'
+          ? `Mot choisi: ${entry.fr} • ${entry.categoryFr}`
+          : `Izvēlēts vārds: ${entry.lv} • ${entry.categoryLv}`);
+        bounceObject(id);
+        if (shouldSpeak) speakText(getWord(entry));
+      } else {
+        const correct = id === state.quizTarget || (id === 'pain' && state.quizTarget === 'pain');
+        state.rounds += 1;
+        if (correct) {
+          state.score += 1;
+          updateStatus(state.lang === 'fr'
+            ? `Bravo! C\'est ${entry.fr}.`
+            : `Pareizi! Tas ir ${entry.lv}.`);
+          bounceObject(id);
+          if (shouldSpeak) speakText(getWord(entry));
+          setTimeout(nextQuizRound, 900);
+        } else {
+          updateStatus(state.lang === 'fr'
+            ? `Essaie encore. Tu as choisi ${entry.fr}.`
+            : `Mēģini vēlreiz. Tu izvēlējies ${entry.lv}.`);
+          if (shouldSpeak) speakText(getWord(entry));
+        }
+      }
+    }
+
+    ui.frBtn.addEventListener('click', () => setLanguage('fr'));
+    ui.lvBtn.addEventListener('click', () => setLanguage('lv'));
+    ui.learnBtn.addEventListener('click', () => setMode('learn'));
+    ui.quizBtn.addEventListener('click', () => setMode('quiz'));
+    ui.speakAllBtn.addEventListener('click', () => {
+      const text = dictionary.map(entry => getWord(entry)).join(', ');
+      speakText(text);
+    });
+
+    renderMenu();
+    setLanguage('fr');
+
+    const floaters = [];
+    const floaterGeo = new THREE.SphereGeometry(0.08, 12, 12);
+    for (let i = 0; i < 22; i++) {
+      const material = new THREE.MeshStandardMaterial({
+        color: new THREE.Color().setHSL(Math.random(), 0.68, 0.68),
+        roughness: 0.5,
+        metalness: 0.1
+      });
+      const particle = new THREE.Mesh(floaterGeo, material);
+      particle.position.set((Math.random() - 0.5) * 12, Math.random() * 6 - 1, (Math.random() - 0.5) * 8);
+      scene.add(particle);
+      floaters.push(particle);
+    }
+
+    window.addEventListener('pointerdown', (event) => {
+      pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(pointer, camera);
+      const hits = raycaster.intersectObjects(burgerMeshes, false);
+      if (hits.length > 0) {
+        const id = hits[0].object.userData.wordId;
+        handleSelection(id, true);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    });
+
+    const clock = new THREE.Clock();
+
+    function animate() {
+      const elapsed = clock.getElapsedTime();
+      burgerGroup.rotation.y = Math.sin(elapsed * 0.3) * 0.26;
+      burgerGroup.position.y = 0.15 + Math.sin(elapsed * 1.3) * 0.12;
+      scribbleRing.rotation.z += 0.004;
+      burgerAura.rotation.z -= 0.01;
+
+      lettuce.rotation.z = Math.sin(elapsed * 2.2) * 0.08;
+      topBun.rotation.z = Math.sin(elapsed * 1.1) * 0.03;
+
+      floaters.forEach((item, index) => {
+        item.position.y += Math.sin(elapsed * 0.8 + index) * 0.002;
+        item.position.x += Math.cos(elapsed * 0.6 + index * 0.5) * 0.0014;
+      });
+
+      controls.update();
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
