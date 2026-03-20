@@ -1,322 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Le Burger Builder Â· French â‡„ Latvian</title>
-  <style>
-    :root {
-      --paper: #fff7e7;
-      --paper-2: #fff2cf;
-      --ink: #263357;
-      --blue: #3559d8;
-      --green: #3ea055;
-      --yellow: #f0cf4d;
-      --red: #d6534d;
-      --brown: #724a30;
-      --cream: #ffeec5;
-      --shadow: 0 18px 50px rgba(27, 24, 20, 0.18);
-      --radius: 26px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Le Burger Builder</title>
+<style>
+:root{--paper:#fff7e6;--paper2:#fff0c8;--ink:#263357;--blue:#3559d8;--green:#3e9f57;--yellow:#efcb4f;--red:#d95a53;--brown:#6f482f;--shadow:0 16px 40px rgba(0,0,0,.16);--r:24px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:"Trebuchet MS","Comic Sans MS",system-ui,sans-serif;color:var(--ink);background:radial-gradient(circle at top,#d7ecff 0,#c9e6ff 28%,#f8ebb9 80%,#f0d6a0 100%);touch-action:manipulation}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;background-image:radial-gradient(rgba(88,66,31,.06) .8px,transparent .9px),radial-gradient(rgba(88,66,31,.03) .7px,transparent .8px);background-size:22px 22px,30px 30px;background-position:0 0,11px 13px}
+#app{position:relative;width:100vw;height:100dvh;overflow:hidden}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ui{position:absolute;inset:0;padding:calc(14px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));display:grid;grid-template-rows:auto auto 1fr auto;gap:12px;pointer-events:none}
+.top,.mid,.tray,.bottom{position:relative;z-index:2;pointer-events:none}
+.top{display:grid;grid-template-columns:minmax(240px,410px) auto;align-items:start;gap:12px}
+.card,.pill,.choice,.modal{position:relative;pointer-events:auto;border-radius:var(--r);background:radial-gradient(circle at top left,rgba(255,255,255,.72),rgba(255,255,255,.18)),linear-gradient(180deg,var(--paper),var(--paper2));border:3px solid rgba(82,63,25,.1);box-shadow:var(--shadow);overflow:hidden}
+.card:before,.choice:before,.modal:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.42;background-image:radial-gradient(rgba(97,77,44,.06) .8px,transparent 1px),radial-gradient(rgba(97,77,44,.04) .7px,transparent .8px);background-size:22px 22px,29px 29px;background-position:0 0,9px 10px}
+.brand{padding:14px 18px 12px;min-height:110px}
+.brand>*{position:relative;z-index:1}
+h1{margin:0;font-family:"Segoe Print","Comic Sans MS",cursive;font-size:clamp(2rem,3vw,2.8rem);line-height:.92;color:#2d4bb1}
+.sub{margin-top:8px;font-family:"Segoe Print","Comic Sans MS",cursive;font-size:.98rem;color:rgba(38,51,87,.78)}
+.line{height:10px;border-radius:999px;margin:10px 0;background:linear-gradient(90deg,transparent 0 4%,var(--green) 4% 48%,var(--red) 48% 72%,var(--yellow) 72% 96%,transparent 96%)}
+.icon{position:absolute;right:14px;top:14px;width:82px;height:82px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.1))}
+.controls{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px;align-items:flex-start}
+.toggle{display:flex;gap:6px;padding:6px;border-radius:999px;background:rgba(255,250,236,.92);border:2px solid rgba(70,58,28,.08);box-shadow:var(--shadow);pointer-events:auto}
+button{appearance:none;border:none;font:inherit;font-weight:900;cursor:pointer;border-radius:999px;padding:11px 16px;color:var(--ink);background:linear-gradient(180deg,#fffdf8,#eee6d2);box-shadow:0 6px 14px rgba(34,38,52,.12);transition:transform .15s ease,opacity .15s ease}
+button:hover{transform:translateY(-1px)}button:active{transform:translateY(1px) scale(.985)}
+.lang.active{background:linear-gradient(180deg,#eef4ff,#dce8ff);color:#2d4bb1;outline:3px solid rgba(53,89,216,.18)}
+.speak{background:linear-gradient(180deg,#fff9ea,#ffe7b9);color:#7f560d}
+.mid{display:flex;justify-content:center}
+.mission{width:min(760px,calc(100vw - 32px));padding:16px 20px 15px;text-align:center}
+.mission>*{position:relative;z-index:1}
+.kicker{font-size:.82rem;letter-spacing:.13em;text-transform:uppercase;font-weight:900;opacity:.62}
+.ask{margin-top:6px;font-size:clamp(1.5rem,3vw,2.4rem);line-height:1.06;font-weight:900;color:#2e4cb2}
+.help{margin-top:8px;font-size:1rem;line-height:1.34;font-weight:700;opacity:.82}
+.tray{align-self:end;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.choice{min-height:122px;padding:10px 10px 12px;display:grid;grid-template-rows:auto 1fr auto;gap:8px;text-align:center;transform-origin:center bottom}
+.choice>*{position:relative;z-index:1}
+.choice.ok{background:radial-gradient(circle at top left,rgba(255,255,255,.76),rgba(255,255,255,.2)),linear-gradient(180deg,#f0fff1,#daf6dd);border-color:rgba(62,159,87,.35)}
+.choice.no{background:radial-gradient(circle at top left,rgba(255,255,255,.76),rgba(255,255,255,.2)),linear-gradient(180deg,#fff5f4,#ffe2df);border-color:rgba(217,90,83,.34)}
+.choice.dim{opacity:.72}
+.bar{height:10px;border-radius:999px;opacity:.96}
+.salade{background:linear-gradient(90deg,transparent 0 10%,var(--green) 10% 90%,transparent 90%)}
+.fromage{background:linear-gradient(90deg,transparent 0 10%,var(--yellow) 10% 90%,transparent 90%)}
+.viande{background:linear-gradient(90deg,transparent 0 7%,var(--brown) 7% 93%,transparent 93%)}
+.tomate{background:linear-gradient(90deg,transparent 0 10%,var(--red) 10% 90%,transparent 90%)}
+.word{display:flex;align-items:center;justify-content:center;text-align:center;font-family:"Segoe Print","Comic Sans MS",cursive;font-size:clamp(1.08rem,2.1vw,1.45rem);font-weight:900;line-height:1.05;color:#33457d}
+.hint{font-size:.84rem;font-weight:800;opacity:.68}
+.bottom{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.hud{display:flex;flex-wrap:wrap;gap:10px}
+.pill{padding:10px 14px;font-weight:900;font-size:.95rem}
+.note{padding:10px 14px;font-weight:900;color:#2f4bb2;white-space:nowrap}
+.toast{position:absolute;left:50%;top:18px;transform:translateX(-50%);padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.84);box-shadow:0 10px 26px rgba(0,0,0,.12);font-weight:900;color:#2e4cb2;opacity:0;z-index:4;pointer-events:none}
+.confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:3}
+.bit{position:absolute;width:14px;height:14px;opacity:0;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 92%,50% 70%,21% 92%,32% 57%,2% 35%,39% 35%)}
+.modal-wrap{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:22px;z-index:5}
+.modal-wrap.show{display:flex}
+.modal{width:min(92vw,540px);padding:22px;text-align:center}
+.modal>*{position:relative;z-index:1}
+.modal h2{margin:0;font-family:"Segoe Print","Comic Sans MS",cursive;font-size:clamp(1.9rem,4vw,3rem);line-height:1;color:#2d4bb1}
+.modal .score{margin-top:10px;font-size:1.16rem;font-weight:900}
+.modal .copy{margin-top:10px;font-size:1rem;line-height:1.34;font-weight:700;opacity:.8}
+.play{margin-top:18px}
+@media (max-width:980px){.tray{grid-template-columns:repeat(2,minmax(0,1fr))}.note{display:none}}
+@media (max-width:640px){.ui{gap:10px}.top{grid-template-columns:1fr}.controls{justify-content:flex-start}.bottom{flex-direction:column;align-items:flex-start}.choice{min-height:112px}}
+</style>
+</head>
+<body>
+<div id="app">
+<canvas id="scene"></canvas>
+<div class="toast" id="toast"></div>
+<div class="confetti" id="confetti"></div>
+<div class="ui">
+  <div class="top">
+    <div class="card brand">
+      <h1>Le Burger</h1>
+      <div class="line"></div>
+      <div class="sub" id="subtitle">Build the burger by picking the right ingredient.</div>
+      <svg class="icon" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <ellipse cx="60" cy="36" rx="36" ry="18" fill="#ead0a7" stroke="#6d5a42" stroke-width="3"/>
+        <rect x="29" y="47" width="62" height="7" rx="4" fill="#3e9f57"/>
+        <rect x="26" y="54" width="68" height="8" rx="4" fill="#d95a53"/>
+        <rect x="30" y="63" width="60" height="7" rx="4" fill="#efcb4f"/>
+        <ellipse cx="60" cy="78" rx="38" ry="15" fill="#ead0a7" stroke="#6d5a42" stroke-width="3"/>
+      </svg>
+    </div>
+    <div class="controls">
+      <div class="toggle">
+        <button class="lang active" id="frBtn">FR</button>
+        <button class="lang" id="lvBtn">LV</button>
+      </div>
+      <button class="speak" id="speakBtn">Speak</button>
+      <button id="restartBtn">Restart</button>
+    </div>
+  </div>
+  <div class="mid">
+    <div class="card mission" id="mission">
+      <div class="kicker" id="kicker">Round 1 of 4</div>
+      <div class="ask" id="ask">Find: salade</div>
+      <div class="help" id="help">Pick the correct ingredient to build your burger.</div>
+    </div>
+  </div>
+  <div class="tray" id="tray"></div>
+  <div class="bottom">
+    <div class="hud">
+      <div class="pill" id="scorePill">Score 0 / 0</div>
+      <div class="pill" id="streakPill">Streak 0</div>
+      <div class="pill" id="buildPill">Burger 0 / 4</div>
+    </div>
+    <div class="pill note" id="note">Tap the burger too.</div>
+  </div>
+</div>
+<div class="modal-wrap" id="modalWrap">
+  <div class="modal">
+    <h2 id="modalTitle">Burger complete!</h2>
+    <div class="line"></div>
+    <div class="score" id="modalScore">You finished with 4 correct picks.</div>
+    <div class="copy" id="modalCopy">Play again and stack another burger.</div>
+    <button class="play" id="playAgainBtn">Play again</button>
+  </div>
+</div>
+</div>
+<script type="module">
+import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm";
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+const WORDS=[
+{id:"salade",fr:"salade",lv:"salati",hintFr:"lettuce",hintLv:"salati",cls:"salade",color:0x3e9f57},
+{id:"fromage",fr:"fromage",lv:"siers",hintFr:"cheese",hintLv:"siers",cls:"fromage",color:0xefcb4f},
+{id:"viande",fr:"viande",lv:"gala",hintFr:"meat",hintLv:"gala",cls:"viande",color:0x6f482f},
+{id:"tomate",fr:"tomate",lv:"tomats",hintFr:"tomato",hintLv:"tomats",cls:"tomate",color:0xd95a53}
+];
+const ui={
+subtitle:document.getElementById("subtitle"), kicker:document.getElementById("kicker"), ask:document.getElementById("ask"),
+help:document.getElementById("help"), tray:document.getElementById("tray"), scorePill:document.getElementById("scorePill"),
+streakPill:document.getElementById("streakPill"), buildPill:document.getElementById("buildPill"), note:document.getElementById("note"),
+toast:document.getElementById("toast"), mission:document.getElementById("mission"), modalWrap:document.getElementById("modalWrap"),
+modalTitle:document.getElementById("modalTitle"), modalScore:document.getElementById("modalScore"), modalCopy:document.getElementById("modalCopy"),
+frBtn:document.getElementById("frBtn"), lvBtn:document.getElementById("lvBtn"), speakBtn:document.getElementById("speakBtn"),
+restartBtn:document.getElementById("restartBtn"), playAgainBtn:document.getElementById("playAgainBtn"), confetti:document.getElementById("confetti")
+};
+const state={lang:"fr", recipe:["salade","fromage","viande","tomate"], step:0, score:0, attempts:0, streak:0, locked:false};
 
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at top, #d6ecff 0%, #c6e6ff 24%, #f7e9be 78%, #f2dca8 100%);
-      font-family: "Trebuchet MS", "Comic Sans MS", system-ui, sans-serif;
-      color: var(--ink);
-      touch-action: manipulation;
-    }
+const byId=id=>WORDS.find(w=>w.id===id);
+const shuffle=a=>{const x=[...a]; for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [x[i],x[j]]=[x[j],x[i]]} return x};
+const label=w=>state.lang==="fr"?w.fr:w.lv;
+const promptText=w=>state.lang==="fr"?`Find: ${w.fr}`:`Atrodi: ${w.lv}`;
+const voiceLang=()=>state.lang==="fr"?"fr-FR":"lv-LV";
 
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background-image:
-        radial-gradient(rgba(85, 65, 34, 0.06) 0.8px, transparent 0.9px),
-        radial-gradient(rgba(85, 65, 34, 0.03) 0.7px, transparent 0.8px);
-      background-size: 22px 22px, 31px 31px;
-      background-position: 0 0, 11px 13px;
-      opacity: 0.28;
-    }
+function speak(text){ if(!("speechSynthesis" in window)) return; const u=new SpeechSynthesisUtterance(text); u.lang=voiceLang(); u.rate=.92; u.pitch=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u); }
+function showToast(text){ ui.toast.textContent=text; gsap.killTweensOf(ui.toast); gsap.set(ui.toast,{y:-8,opacity:0}); gsap.to(ui.toast,{y:0,opacity:1,duration:.18}); gsap.to(ui.toast,{opacity:0,duration:.35,delay:.85}); }
+function burst(){ for(let i=0;i<14;i++){ const d=document.createElement("div"); d.className="bit"; d.style.left=(45+Math.random()*10)+"%"; d.style.top=(44+Math.random()*8)+"%"; d.style.background=["#3559d8","#3e9f57","#efcb4f","#d95a53"][i%4]; ui.confetti.appendChild(d); gsap.fromTo(d,{x:0,y:0,opacity:1,scale:.4,rotate:0},{x:-120+Math.random()*240,y:-120-Math.random()*120,rotate:180+Math.random()*180,scale:1,opacity:0,duration:1,ease:"power2.out",onComplete:()=>d.remove()}); } }
+function updateHud(){ ui.scorePill.textContent=`Score ${state.score} / ${state.attempts}`; ui.streakPill.textContent=`Streak ${state.streak}`; ui.buildPill.textContent=`Burger ${state.step} / ${state.recipe.length}`; }
+function updateText(){ const target=byId(state.recipe[state.step]); ui.frBtn.classList.toggle("active",state.lang==="fr"); ui.lvBtn.classList.toggle("active",state.lang==="lv");
+ ui.subtitle.textContent=state.lang==="fr"?"Build the burger by picking the right French ingredient.":"Buuve burgeru, izveloties pareizo latviesu sastavdalu.";
+ ui.note.textContent=state.lang==="fr"?"Tap the burger too.":"Spied ari uz burgera.";
+ ui.speakBtn.textContent=state.lang==="fr"?"Speak":"Runat"; ui.restartBtn.textContent=state.lang==="fr"?"Restart":"Sakt no jauna"; ui.playAgainBtn.textContent=state.lang==="fr"?"Play again":"Spelet velreiz";
+ ui.kicker.textContent=(state.lang==="fr"?"Round ":"Solis ")+(state.step+1)+" / "+state.recipe.length; ui.ask.textContent=promptText(target); ui.help.textContent=state.lang==="fr"?"Pick the correct ingredient to stack your burger.":"Izvelies pareizo sastavdalu, lai saliktu burgeru.";
+ gsap.fromTo(ui.mission,{scale:.97,y:8,opacity:.6},{scale:1,y:0,opacity:1,duration:.25,ease:"back.out(1.8)"}); }
+function renderChoices(){ ui.tray.innerHTML=""; const choices=shuffle(WORDS); choices.forEach((w,i)=>{ const b=document.createElement("button"); b.className="choice"; b.dataset.id=w.id; b.innerHTML=`<div class="bar ${w.cls}"></div><div class="word">${label(w)}</div><div class="hint">${state.lang==="fr"?w.hintFr:w.hintLv}</div>`; b.addEventListener("click",()=>guess(w.id,b)); ui.tray.appendChild(b); gsap.fromTo(b,{y:50,opacity:0,rotate:(i%2?3:-3)},{y:0,opacity:1,rotate:0,duration:.35,delay:i*.05,ease:"back.out(1.7)"}); }); }
+function markChoices(correctId, clickedId){ [...ui.tray.children].forEach(el=>{ if(el.dataset.id===correctId) el.classList.add("ok"); else if(el.dataset.id===clickedId) el.classList.add("no"); else el.classList.add("dim"); }); }
+function startGame(){ state.step=0; state.score=0; state.attempts=0; state.streak=0; state.locked=false; ui.modalWrap.classList.remove("show"); resetBurger(); updateHud(); updateText(); renderChoices(); focusTarget(); }
+function finishGame(){ ui.modalWrap.classList.add("show"); ui.modalTitle.textContent=state.lang==="fr"?"Burger complete!":"Burgers gatavs!"; ui.modalScore.textContent=(state.lang==="fr"?"You finished with ":"Tu pabeidzi ar ")+state.score+" / "+state.attempts; ui.modalCopy.textContent=state.lang==="fr"?"Play again and build another tasty tower.":"Spele velreiz un uzcel vel vienu garsigu burgeru."; gsap.fromTo(".modal",{scale:.85,opacity:0},{scale:1,opacity:1,duration:.28,ease:"back.out(1.7)"}); }
+function nextStep(){ state.locked=false; state.step++; updateHud(); if(state.step>=state.recipe.length){ finishGame(); return; } updateText(); renderChoices(); focusTarget(); }
+function guess(id,btn){ if(state.locked) return; const target=byId(state.recipe[state.step]); if(id===target.id){ state.locked=true; state.attempts++; state.score++; state.streak++; updateHud(); markChoices(target.id,id); addIngredient(id); bounceBurger(id,true); showToast(state.lang==="fr"?"Correct!":"Pareizi!"); burst(); speak(label(target)); if(btn) gsap.to(btn,{y:-8,scale:1.04,duration:.16,yoyo:true,repeat:1}); setTimeout(nextStep,850); } else { state.attempts++; state.streak=0; updateHud(); if(btn){ btn.classList.add("no"); gsap.fromTo(btn,{x:0},{x:-6,duration:.05,repeat:5,yoyo:true}); } bounceBurger(id,false); showToast(state.lang==="fr"?"Try again":"Megini velreiz"); } }
+ui.frBtn.addEventListener("click",()=>{state.lang="fr"; updateText(); renderChoices();}); ui.lvBtn.addEventListener("click",()=>{state.lang="lv"; updateText(); renderChoices();}); ui.speakBtn.addEventListener("click",()=>speak(label(byId(state.recipe[state.step])))); ui.restartBtn.addEventListener("click",startGame); ui.playAgainBtn.addEventListener("click",startGame);
 
-    #app {
-      position: relative;
-      width: 100vw;
-      height: 100dvh;
-      overflow: hidden;
-    }
-
-    canvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    .ui {
-      position: absolute;
-      inset: 0;
-      padding:
-        calc(14px + env(safe-area-inset-top))
-        calc(14px + env(safe-area-inset-right))
-        calc(14px + env(safe-area-inset-bottom))
-        calc(14px + env(safe-area-inset-left));
-      display: grid;
-      grid-template-rows: auto auto 1fr auto;
-      gap: 12px;
-      pointer-events: none;
-    }
-
-    .top-row,
-    .mission-row,
-    .tray-row,
-    .bottom-row {
-      position: relative;
-      z-index: 2;
-      pointer-events: none;
-    }
-
-    .top-row {
-      display: grid;
-      grid-template-columns: minmax(260px, 420px) auto;
-      align-items: start;
-      gap: 12px;
-    }
-
-    .paper, .pill, .ingredient-btn, .modal {
-      position: relative;
-      pointer-events: auto;
-      border-radius: var(--radius);
-      background:
-        radial-gradient(circle at top left, rgba(255,255,255,0.72), rgba(255,255,255,0.18)),
-        linear-gradient(180deg, var(--paper), var(--paper-2));
-      box-shadow: var(--shadow);
-      border: 3px solid rgba(87, 68, 32, 0.10);
-      overflow: hidden;
-    }
-
-    .paper::before,
-    .ingredient-btn::before,
-    .modal::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background-image:
-        radial-gradient(rgba(97, 77, 44, 0.06) 0.8px, transparent 1px),
-        radial-gradient(rgba(97, 77, 44, 0.04) 0.7px, transparent 0.8px);
-      background-size: 22px 22px, 29px 29px;
-      background-position: 0 0, 9px 10px;
-      opacity: 0.45;
-    }
-
-    .brand-card {
-      padding: 14px 18px 12px;
-      min-height: 112px;
-    }
-
-    .brand-card > * { position: relative; z-index: 1; }
-
-    .title {
-      margin: 0;
-      font-family: "Segoe Print", "Comic Sans MS", cursive;
-      font-size: clamp(2rem, 3vw, 2.9rem);
-      line-height: 0.92;
-      color: #2d4bb1;
-      letter-spacing: 0.5px;
-    }
-
-    .subtitle {
-      margin-top: 8px;
-      font-family: "Segoe Print", "Comic Sans MS", cursive;
-      font-size: 0.98rem;
-      color: rgba(38, 51, 87, 0.78);
-    }
-
-    .crayon-line {
-      height: 10px;
-      border-radius: 999px;
-      margin: 10px 0 10px;
-      background: linear-gradient(90deg,
-        transparent 0%, transparent 4%,
-        var(--green) 4%, var(--green) 48%,
-        var(--red) 48%, var(--red) 72%,
-        var(--yellow) 72%, var(--yellow) 96%,
-        transparent 96%);
-      opacity: 0.95;
-    }
-
-    .tiny-burger {
-      position: absolute;
-      right: 14px;
-      top: 14px;
-      width: 82px;
-      height: 82px;
-      filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.10));
-    }
-
-    .control-wrap {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: flex-end;
-      align-items: flex-start;
-    }
-
-    .toggle {
-      display: flex;
-      gap: 6px;
-      padding: 6px;
-      border-radius: 999px;
-      background: rgba(255, 250, 236, 0.92);
-      box-shadow: var(--shadow);
-      border: 2px solid rgba(71, 58, 28, 0.08);
-      pointer-events: auto;
-    }
-
-    button {
-      appearance: none;
-      border: none;
-      font: inherit;
-      font-weight: 900;
-      cursor: pointer;
-      border-radius: 999px;
-      padding: 11px 16px;
-      color: var(--ink);
-      background: linear-gradient(180deg, #fffdf8, #ede7d3);
-      box-shadow: 0 6px 14px rgba(36, 38, 52, 0.12);
-      transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
-    }
-
-    button:hover { transform: translateY(-1px); }
-    button:active { transform: translateY(1px) scale(0.985); }
-
-    .lang-btn.active,
-    .ghost-btn.active {
-      background: linear-gradient(180deg, #eef4ff, #dce8ff);
-      color: #2d4bb1;
-      outline: 3px solid rgba(53, 89, 216, 0.18);
-    }
-
-    .speak-btn {
-      background: linear-gradient(180deg, #fff9ea, #ffe7b9);
-      color: #7f560d;
-      pointer-events: auto;
-    }
-
-    .mission-row {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-    }
-
-    .mission-card {
-      width: min(780px, calc(100vw - 32px));
-      padding: 16px 20px 15px;
-      text-align: center;
-    }
-
-    .mission-card > * { position: relative; z-index: 1; }
-
-    .mission-label {
-      font-size: 0.82rem;
-      letter-spacing: 0.13em;
-      text-transform: uppercase;
-      opacity: 0.62;
-      font-weight: 900;
-    }
-
-    .mission-main {
-      margin-top: 6px;
-      font-size: clamp(1.55rem, 3vw, 2.5rem);
-      line-height: 1.06;
-      font-weight: 900;
-      color: #2e4cb2;
-    }
-
-    .mission-sub {
-      margin-top: 7px;
-      font-size: 1rem;
-      line-height: 1.35;
-      font-weight: 700;
-      opacity: 0.82;
-    }
-
-    .bottom-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      gap: 12px;
-      pointer-events: none;
-    }
-
-    .hud {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      pointer-events: none;
-    }
-
-    .pill {
-      padding: 10px 14px;
-      font-weight: 900;
-      font-size: 0.95rem;
-      pointer-events: auto;
-    }
-
-    .corner-note {
-      padding: 10px 14px;
-      font-weight: 900;
-      color: #2f4bb2;
-      pointer-events: none;
-      white-space: nowrap;
-    }
-
-    .tray-row {
-      align-self: end;
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-      pointer-events: none;
-    }
-
-    .ingredient-btn {
-      min-height: 124px;
-      padding: 10px 10px 12px;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: 8px;
-      text-align: center;
-      user-select: none;
-      transform-origin: center bottom;
-    }
-
-    .ingredient-btn > * { position: relative; z-index: 1; }
-
-    .ingredient-btn.correct {
-      background:
-        radial-gradient(circle at top left, rgba(255,255,255,0.76), rgba(255,255,255,0.20)),
-        linear-gradient(180deg, #f0fff1, #d9f6dc);
-      border-color: rgba(62, 160, 85, 0.35);
-    }
-
-    .ingredient-btn.wrong {
-      background:
-        radial-gradient(circle at top left, rgba(255,255,255,0.76), rgba(255,255,255,0.20)),
-        linear-gradient(180deg, #fff5f4, #ffe2df);
-      border-color: rgba(214, 83, 77, 0.34);
-    }
-
-    .ingredient-btn.dim {
-      opacity: 0.72;
-    }
-
-    .ingredient-s\®&Û•ê
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0xcfe8ff); scene.fog=new THREE.Fog(0xcfe8ff,10,22);
+const canvas=document.getElementById("scene"); const renderer=new THREE.WebGLRenderer({canvas,antialias:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight); renderer.outputColorSpace=THREE.SRGBColorSpace;
+const camera=new THREE.PerspectiveCamera(38,innerWidth/innerHeight,.1,100); camera.position.set(0,2.4,8.6);
+scene.add(new THREE.AmbientLight(0xffffff,1.35)); const sun=new THREE.DirectionalLight(0xffffff,1.3); sun.position.set(4,8,6); scene.add(sun); const fill=new THREE.DirectionalLight(0xffefc4,.7); fill.position.set(-5,4,3); scene.add(fill);
+const ground=new THREE.Mesh(new THREE.CircleGeometry(8,64),new THREE.MeshStandardMaterial({color:0xf0d7a3,roughness:1})); ground.rotation.x=-Math.PI/2; ground.position.y=-1.55; scene.add(ground);
+const burger=new THREE.Group(); scene.add(burger);
+const parts={};
+parts.bottom=new THREE.Mesh(new THREE.CylinderGeometry(1.85,1.98,.56,40),new THREE.MeshStandardMaterial({color:0xe3c18f,roughness:.92})); parts.bottom.position.y=-.95; burger.add(parts.bottom);
+parts.meat=new THREE.Mesh(new THREE.CylinderGeometry(1.58,1.7,.32,40),new THREE.MeshStandardMaterial({color:0x6f482f,roughness:.98,transparent:true,opacity:.15})); parts.meat.position.y=-.38; parts.meat.visible=false; burger.add(parts.meat);
+parts.cheese=new THREE.Mesh(new THREE.BoxGeometry(2.35,.08,2.35),new THREE.MeshStandardMaterial({color:0xefcb4f,roughness:.9,transparent:true,opacity:.15})); parts.cheese.position.y=-.08; parts.cheese.rotation.y=Math.PI/4; parts.cheese.visible=false; burger.add(parts.cheese);
+const sh=new THREE.Shape(); sh.moveTo(-1.8,0); sh.bezierCurveTo(-1.2,.35,-.7,-.3,-.12,.16); sh.bezierCurveTo(.28,.42,.92,-.2,1.46,.22); sh.bezierCurveTo(1.75,.32,1.95,.05,1.84,-.12); sh.bezierCurveTo(1.24,-.32,.5,.16,-.18,-.23); sh.bezierCurveTo(-.85,-.54,-1.28,.2,-1.8,0);
+parts.lettuce=new THREE.Mesh(new THREE.ExtrudeGeometry(sh,{depth:.1,bevelEnabled:false}),new THREE.MeshStandardMaterial({color:0x3e9f57,roughness:.98,transparent:true,opacity:.15})); parts.lettuce.rotation.x=-Math.PI/2; parts.lettuce.position.set(0,.16,.95); parts.lettuce.visible=false; burger.add(parts.lettuce);
+parts.tomato1=new THREE.Mesh(new THREE.CylinderGeometry(.72,.72,.08,28),new THREE.MeshStandardMaterial({color:0xd95a53,roughness:.9,transparent:true,opacity:.15})); parts.tomato2=parts.tomato1.clone(); parts.tomato1.visible=false; parts.tomato2.visible=false; parts.tomato1.position.set(-.55,-.18,.3); parts.tomato2.position.set(.55,-.18,-.25); burger.add(parts.tomato1,parts.tomato2);
+parts.top=new THREE.Mesh(new THREE.SphereGeometry(1.7,40,40,0,Math.PI*2,0,Math.PI/2.05),new THREE.MeshStandardMaterial({color:0xe9c998,roughness:.88})); parts.top.scale.set(1,.82,1); parts.top.position.y=.98; burger.add(parts.top);
+const seedGeo=new THREE.SphereGeometry(.05,10,10); for(let i=0;i<16;i++){ const s=new THREE.Mesh(seedGeo,new THREE.MeshStandardMaterial({color:0xfff6da,roughness:.95})); const a=Math.random()*Math.PI*2; const r=.25+Math.random()*1.02; s.position.set(Math.cos(a)*r,1.48+Math.random()*.17,Math.sin(a)*r*.72); s.scale.set(1.2,.65,1.5); burger.add(s); }
+const aura=new THREE.Mesh(new THREE.TorusGeometry(2.32,.07,12,100),new THREE.MeshStandardMaterial({color:0xd95a53,roughness:.58,emissive:0x5b1613})); aura.rotation.x=Math.PI/2; aura.position.y=.05; scene.add(aura);
+const clickables=[parts.lettuce,parts.cheese,parts.meat,parts.tomato1]; const ray=new THREE.Raycaster(), mouse=new THREE.Vector2();
+canvas.addEventListener("pointerdown",e=>{ mouse.x=e.clientX/innerWidth*2-1; mouse.y=-(e.clientY/innerHeight)*2+1; ray.setFromCamera(mouse,camera); const hits=ray.intersectObjects(clickables,false); if(hits.length){ const obj=hits[0].object; let id="salade"; if(obj===parts.cheese) id="fromage"; else if(obj===parts.meat) id="viande"; else if(obj===parts.tomato1) id="tomate"; guess(id,null); }});
+function resetBurger(){ [parts.lettuce,parts.cheese,parts.meat,parts.tomato1,parts.tomato2].forEach(p=>{ p.visible=false; p.material.opacity=.15; }); parts.top.position.y=.98; parts.bottom.position.y=-.95; parts.meat.position.y=-.38; parts.cheese.position.y=-.08; parts.lettuce.position.y=.16; parts.tomato1.position.y=-.18; parts.tomato2.position.y=-.18; gsap.set([parts.bottom.scale,parts.top.scale,parts.meat.scale,parts.cheese.scale,parts.lettuce.scale,parts.tomato1.scale,parts.tomato2.scale],{x:1,y:1,z:1}); parts.top.scale.set(1,.82,1); }
+function addIngredient(id){ if(id==="salade"){ parts.lettuce.visible=true; gsap.fromTo(parts.lettuce.position,{y:.55},{y:.16,duration:.45,ease:"bounce.out"}); gsap.to(parts.lettuce.material,{opacity:1,duration:.2}); }
+ if(id==="fromage"){ parts.cheese.visible=true; gsap.fromTo(parts.cheese.position,{y:.35},{y:-.08,duration:.42,ease:"bounce.out"}); gsap.to(parts.cheese.material,{opacity:1,duration:.2}); }
+ if(id==="viande"){ parts.meat.visible=true; gsap.fromTo(parts.meat.position,{y:.1},{y:-.38,duration:.42,ease:"bounce.out"}); gsap.to(parts.meat.material,{opacity:1,duration:.2}); }
+ if(id==="tomate"){ parts.tomato1.visible=parts.tomato2.visible=true; gsap.fromTo([parts.tomato1.position,parts.tomato2.position],{y:.1},{y:-.18,duration:.42,ease:"bounce.out"}); gsap.to([parts.tomato1.material,parts.tomato2.material],{opacity:1,duration:.2}); }
+ gsap.fromTo(parts.top.position,{y:parts.top.position.y+.12},{y:parts.top.position.y,duration:.35,ease:"bounce.out"}); }
+function bounceBurger(id,good){ const targets=id==="salade"?[parts.lettuce]:id==="fromage"?[parts.cheese]:id==="viande"?[parts.meat]:[parts.tomato1,parts.tomato2]; gsap.fromTo(targets.map(t=>t.scale),{x:1,y:1,z:1},{x:good?1.15:1.08,y:good?1.15:1.08,z:good?1.15:1.08,duration:.12,yoyo:true,repeat:1}); gsap.fromTo(burger.rotation,{z:0},{z:good?.06:-.05,duration:.12,yoyo:true,repeat:1}); }
+function focusTarget(){ const t=state.recipe[state.step]; const m=t==="salade"?parts.lettuce:t==="fromage"?parts.cheese:t==="viande"?parts.meat:parts.tomato1; gsap.fromTo(m.scale,{x:1,y:1,z:1},{x:1.06,y:1.06,z:1.06,duration:.3,yoyo:true,repeat:1}); }
+window.addEventListener("resize",()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); renderer.setPixelRatio(Math.min(devicePixelRatio,2)); });
+const clock=new THREE.Clock(); function animate(){ const t=clock.getElapsedTime(); burger.rotation.y=Math.sin(t*.55)*.23; burger.position.y=.02+Math.sin(t*1.5)*.08; aura.rotation.z+=.006; camera.position.x=Math.sin(t*.25)*.18; camera.position.z=(innerWidth/innerHeight<.8)?9.1:8.6; camera.lookAt(0,.1,0); renderer.render(scene,camera); requestAnimationFrame(animate); }
+startGame(); animate();
+</script>
+</body>
+</html>
