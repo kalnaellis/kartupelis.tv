@@ -76,7 +76,7 @@ button:hover{transform:translateY(-1px)}button:active{transform:translateY(1px) 
     <div class="card brand">
       <h1>Le Burger</h1>
       <div class="line"></div>
-      <div class="sub" id="subtitle">Build the burger by picking the right ingredient.</div>
+      <div class="sub" id="subtitle">Build the burger by picking the matching translation.</div>
       <svg class="icon" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <ellipse cx="60" cy="36" rx="36" ry="18" fill="#ead0a7" stroke="#6d5a42" stroke-width="3"/>
         <rect x="29" y="47" width="62" height="7" rx="4" fill="#3e9f57"/>
@@ -90,15 +90,15 @@ button:hover{transform:translateY(-1px)}button:active{transform:translateY(1px) 
         <button class="lang active" id="frBtn">FR</button>
         <button class="lang" id="lvBtn">LV</button>
       </div>
-      <button class="speak" id="speakBtn">Speak</button>
+      <button class="speak" id="speakBtn">Speak clue</button>
       <button id="restartBtn">Restart</button>
     </div>
   </div>
   <div class="mid">
     <div class="card mission" id="mission">
       <div class="kicker" id="kicker">Round 1 of 4</div>
-      <div class="ask" id="ask">Find: salade</div>
-      <div class="help" id="help">Pick the correct ingredient to build your burger.</div>
+      <div class="ask" id="ask">Find: salati</div>
+      <div class="help" id="help">Pick the correct French ingredient for the Latvian clue.</div>
     </div>
   </div>
   <div class="tray" id="tray"></div>
@@ -108,7 +108,7 @@ button:hover{transform:translateY(-1px)}button:active{transform:translateY(1px) 
       <div class="pill" id="streakPill">Streak 0</div>
       <div class="pill" id="buildPill">Burger 0 / 4</div>
     </div>
-    <div class="pill note" id="note">Tap the burger too.</div>
+    <div class="pill note" id="note">Prompt language is opposite to the answers.</div>
   </div>
 </div>
 <div class="modal-wrap" id="modalWrap">
@@ -144,27 +144,73 @@ const state={lang:"fr", recipe:["salade","fromage","viande","tomate"], step:0, s
 
 const byId=id=>WORDS.find(w=>w.id===id);
 const shuffle=a=>{const x=[...a]; for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [x[i],x[j]]=[x[j],x[i]]} return x};
-const label=w=>state.lang==="fr"?w.fr:w.lv;
-const promptText=w=>state.lang==="fr"?`Find: ${w.fr}`:`Atrodi: ${w.lv}`;
-const voiceLang=()=>state.lang==="fr"?"fr-FR":"lv-LV";
+const answerLabel=w=>state.lang==="fr"?w.fr:w.lv;
+const answerHint=w=>state.lang==="fr"?w.hintFr:w.hintLv;
+const promptLabel=w=>state.lang==="fr"?w.lv:w.fr;
+const promptPrefix=()=>state.lang==="fr"?"Find: ":"Atrodi: ";
+const clueVoiceLang=()=>state.lang==="fr"?"lv-LV":"fr-FR";
+const answerVoiceLang=()=>state.lang==="fr"?"fr-FR":"lv-LV";
 
-function speak(text){ if(!("speechSynthesis" in window)) return; const u=new SpeechSynthesisUtterance(text); u.lang=voiceLang(); u.rate=.92; u.pitch=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u); }
+function speak(text, lang){ if(!("speechSynthesis" in window)) return; const u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=.92; u.pitch=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u); }
 function showToast(text){ ui.toast.textContent=text; gsap.killTweensOf(ui.toast); gsap.set(ui.toast,{y:-8,opacity:0}); gsap.to(ui.toast,{y:0,opacity:1,duration:.18}); gsap.to(ui.toast,{opacity:0,duration:.35,delay:.85}); }
 function burst(){ for(let i=0;i<14;i++){ const d=document.createElement("div"); d.className="bit"; d.style.left=(45+Math.random()*10)+"%"; d.style.top=(44+Math.random()*8)+"%"; d.style.background=["#3559d8","#3e9f57","#efcb4f","#d95a53"][i%4]; ui.confetti.appendChild(d); gsap.fromTo(d,{x:0,y:0,opacity:1,scale:.4,rotate:0},{x:-120+Math.random()*240,y:-120-Math.random()*120,rotate:180+Math.random()*180,scale:1,opacity:0,duration:1,ease:"power2.out",onComplete:()=>d.remove()}); } }
 function updateHud(){ ui.scorePill.textContent=`Score ${state.score} / ${state.attempts}`; ui.streakPill.textContent=`Streak ${state.streak}`; ui.buildPill.textContent=`Burger ${state.step} / ${state.recipe.length}`; }
-function updateText(){ const target=byId(state.recipe[state.step]); ui.frBtn.classList.toggle("active",state.lang==="fr"); ui.lvBtn.classList.toggle("active",state.lang==="lv");
- ui.subtitle.textContent=state.lang==="fr"?"Build the burger by picking the right French ingredient.":"Buuve burgeru, izveloties pareizo latviesu sastavdalu.";
- ui.note.textContent=state.lang==="fr"?"Tap the burger too.":"Spied ari uz burgera.";
- ui.speakBtn.textContent=state.lang==="fr"?"Speak":"Runat"; ui.restartBtn.textContent=state.lang==="fr"?"Restart":"Sakt no jauna"; ui.playAgainBtn.textContent=state.lang==="fr"?"Play again":"Spelet velreiz";
- ui.kicker.textContent=(state.lang==="fr"?"Round ":"Solis ")+(state.step+1)+" / "+state.recipe.length; ui.ask.textContent=promptText(target); ui.help.textContent=state.lang==="fr"?"Pick the correct ingredient to stack your burger.":"Izvelies pareizo sastavdalu, lai saliktu burgeru.";
- gsap.fromTo(ui.mission,{scale:.97,y:8,opacity:.6},{scale:1,y:0,opacity:1,duration:.25,ease:"back.out(1.8)"}); }
-function renderChoices(){ ui.tray.innerHTML=""; const choices=shuffle(WORDS); choices.forEach((w,i)=>{ const b=document.createElement("button"); b.className="choice"; b.dataset.id=w.id; b.innerHTML=`<div class="bar ${w.cls}"></div><div class="word">${label(w)}</div><div class="hint">${state.lang==="fr"?w.hintFr:w.hintLv}</div>`; b.addEventListener("click",()=>guess(w.id,b)); ui.tray.appendChild(b); gsap.fromTo(b,{y:50,opacity:0,rotate:(i%2?3:-3)},{y:0,opacity:1,rotate:0,duration:.35,delay:i*.05,ease:"back.out(1.7)"}); }); }
+function updateText(){
+  const target=byId(state.recipe[state.step]);
+  ui.frBtn.classList.toggle("active",state.lang==="fr");
+  ui.lvBtn.classList.toggle("active",state.lang==="lv");
+  ui.subtitle.textContent=state.lang==="fr"
+    ?"The clue is Latvian. Pick the matching French ingredient."
+    :"Uzdevums ir franciski. Izvelies pareizo latviesu sastavdalu.";
+  ui.note.textContent=state.lang==="fr"
+    ?"Clue in Latvian, answers in French."
+    :"Jautajums franciski, atbildes latviski.";
+  ui.speakBtn.textContent=state.lang==="fr"?"Speak clue":"Nolasit uzdevumu";
+  ui.restartBtn.textContent=state.lang==="fr"?"Restart":"Sakt no jauna";
+  ui.playAgainBtn.textContent=state.lang==="fr"?"Play again":"Spelet velreiz";
+  ui.kicker.textContent=(state.lang==="fr"?"Round ":"Solis ")+(state.step+1)+" / "+state.recipe.length;
+  ui.ask.textContent=promptPrefix()+promptLabel(target);
+  ui.help.textContent=state.lang==="fr"
+    ?"Pick the correct French ingredient for the clue."
+    :"Izvelies pareizo latviesu sastavdalu dotajam francu vardam.";
+  gsap.fromTo(ui.mission,{scale:.97,y:8,opacity:.6},{scale:1,y:0,opacity:1,duration:.25,ease:"back.out(1.8)"});
+}
+function renderChoices(){
+  ui.tray.innerHTML="";
+  const choices=shuffle(WORDS);
+  choices.forEach((w,i)=>{
+    const b=document.createElement("button");
+    b.className="choice";
+    b.dataset.id=w.id;
+    b.innerHTML=`<div class="bar ${w.cls}"></div><div class="word">${answerLabel(w)}</div><div class="hint">${answerHint(w)}</div>`;
+    b.addEventListener("click",()=>guess(w.id,b));
+    ui.tray.appendChild(b);
+    gsap.fromTo(b,{y:50,opacity:0,rotate:(i%2?3:-3)},{y:0,opacity:1,rotate:0,duration:.35,delay:i*.05,ease:"back.out(1.7)"});
+  });
+}
 function markChoices(correctId, clickedId){ [...ui.tray.children].forEach(el=>{ if(el.dataset.id===correctId) el.classList.add("ok"); else if(el.dataset.id===clickedId) el.classList.add("no"); else el.classList.add("dim"); }); }
 function startGame(){ state.step=0; state.score=0; state.attempts=0; state.streak=0; state.locked=false; ui.modalWrap.classList.remove("show"); resetBurger(); updateHud(); updateText(); renderChoices(); focusTarget(); }
-function finishGame(){ ui.modalWrap.classList.add("show"); ui.modalTitle.textContent=state.lang==="fr"?"Burger complete!":"Burgers gatavs!"; ui.modalScore.textContent=(state.lang==="fr"?"You finished with ":"Tu pabeidzi ar ")+state.score+" / "+state.attempts; ui.modalCopy.textContent=state.lang==="fr"?"Play again and build another tasty tower.":"Spele velreiz un uzcel vel vienu garsigu burgeru."; gsap.fromTo(".modal",{scale:.85,opacity:0},{scale:1,opacity:1,duration:.28,ease:"back.out(1.7)"}); }
+function finishGame(){ ui.modalWrap.classList.add("show"); ui.modalTitle.textContent=state.lang==="fr"?"Burger complete!":"Burgers gatavs!"; ui.modalScore.textContent=(state.lang==="fr"?"You finished with ":"Tu pabeidzi ar ")+state.score+" / "+state.attempts; ui.modalCopy.textContent=state.lang==="fr"?"Play again and stack another burger.":"Spele velreiz un uzcel vel vienu burgeru."; gsap.fromTo(".modal",{scale:.85,opacity:0},{scale:1,opacity:1,duration:.28,ease:"back.out(1.7)"}); }
 function nextStep(){ state.locked=false; state.step++; updateHud(); if(state.step>=state.recipe.length){ finishGame(); return; } updateText(); renderChoices(); focusTarget(); }
-function guess(id,btn){ if(state.locked) return; const target=byId(state.recipe[state.step]); if(id===target.id){ state.locked=true; state.attempts++; state.score++; state.streak++; updateHud(); markChoices(target.id,id); addIngredient(id); bounceBurger(id,true); showToast(state.lang==="fr"?"Correct!":"Pareizi!"); burst(); speak(label(target)); if(btn) gsap.to(btn,{y:-8,scale:1.04,duration:.16,yoyo:true,repeat:1}); setTimeout(nextStep,850); } else { state.attempts++; state.streak=0; updateHud(); if(btn){ btn.classList.add("no"); gsap.fromTo(btn,{x:0},{x:-6,duration:.05,repeat:5,yoyo:true}); } bounceBurger(id,false); showToast(state.lang==="fr"?"Try again":"Megini velreiz"); } }
-ui.frBtn.addEventListener("click",()=>{state.lang="fr"; updateText(); renderChoices();}); ui.lvBtn.addEventListener("click",()=>{state.lang="lv"; updateText(); renderChoices();}); ui.speakBtn.addEventListener("click",()=>speak(label(byId(state.recipe[state.step])))); ui.restartBtn.addEventListener("click",startGame); ui.playAgainBtn.addEventListener("click",startGame);
+function guess(id,btn){
+  if(state.locked) return;
+  const target=byId(state.recipe[state.step]);
+  if(id===target.id){
+    state.locked=true; state.attempts++; state.score++; state.streak++; updateHud(); markChoices(target.id,id); addIngredient(id); bounceBurger(id,true);
+    showToast(state.lang==="fr"?"Correct!":"Pareizi!"); burst(); speak(answerLabel(target), answerVoiceLang());
+    if(btn) gsap.to(btn,{y:-8,scale:1.04,duration:.16,yoyo:true,repeat:1});
+    setTimeout(nextStep,850);
+  } else {
+    state.attempts++; state.streak=0; updateHud();
+    if(btn){ btn.classList.add("no"); gsap.fromTo(btn,{x:0},{x:-6,duration:.05,repeat:5,yoyo:true}); }
+    bounceBurger(id,false); showToast(state.lang==="fr"?"Try again":"Megini velreiz");
+  }
+}
+ui.frBtn.addEventListener("click",()=>{state.lang="fr"; updateText(); renderChoices();});
+ui.lvBtn.addEventListener("click",()=>{state.lang="lv"; updateText(); renderChoices();});
+ui.speakBtn.addEventListener("click",()=>speak(promptLabel(byId(state.recipe[state.step])), clueVoiceLang()));
+ui.restartBtn.addEventListener("click",startGame);
+ui.playAgainBtn.addEventListener("click",startGame);
 
 const scene=new THREE.Scene(); scene.background=new THREE.Color(0xcfe8ff); scene.fog=new THREE.Fog(0xcfe8ff,10,22);
 const canvas=document.getElementById("scene"); const renderer=new THREE.WebGLRenderer({canvas,antialias:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight); renderer.outputColorSpace=THREE.SRGBColorSpace;
