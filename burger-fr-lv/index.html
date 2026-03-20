@@ -3,818 +3,320 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Le Burger • French ⇄ Latvian Kids Game</title>
+  <title>Le Burger Builder · French ⇄ Latvian</title>
   <style>
-    :root{
-      --paper:#fff8ea;
-      --ink:#24314f;
-      --blue:#345cdb;
-      --green:#3a9d59;
-      --red:#d8524b;
-      --yellow:#f0cf53;
-      --brown:#6d4a2e;
-      --shadow:0 14px 40px rgba(31,33,46,.18);
+    :root {
+      --paper: #fff7e7;
+      --paper-2: #fff2cf;
+      --ink: #263357;
+      --blue: #3559d8;
+      --green: #3ea055;
+      --yellow: #f0cf4d;
+      --red: #d6534d;
+      --brown: #724a30;
+      --cream: #ffeec5;
+      --shadow: 0 18px 50px rgba(27, 24, 20, 0.18);
+      --radius: 26px;
     }
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{
-      margin:0;
-      width:100%;
-      height:100%;
-      overflow:hidden;
-      background:linear-gradient(180deg,#cfe8ff 0%, #f5e5bc 60%, #f0d9a3 100%);
-      font-family:"Trebuchet MS","Comic Sans MS",system-ui,sans-serif;
-      color:var(--ink);
-    }
-    body{touch-action:manipulation}
-    #app{
-      position:relative;
-      width:100vw;
-      height:100dvh;
-      overflow:hidden;
-    }
-    canvas{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      display:block;
-    }
-    .ui{
-      position:absolute;
-      inset:0;
-      display:grid;
-      grid-template-rows:auto 1fr auto;
-      padding:18px;
-      pointer-events:none;
-    }
-    .topbar,.question-wrap,.answers-wrap{pointer-events:none}
-    .topbar{
-      display:grid;
-      grid-template-columns:minmax(240px,420px) auto;
-      gap:14px;
-      align-items:start;
-    }
-    .card,.chip,.answer-card,.question-card,.corner-note{
-      position:relative;
-      pointer-events:auto;
-      border-radius:26px;
-      background:rgba(255,250,240,.88);
-      box-shadow:var(--shadow);
-      backdrop-filter:blur(8px);
-    }
-    .paper{
-      border:3px solid rgba(64,45,18,.11);
-      overflow:hidden;
-    }
-    .paper::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background-image:
-        radial-gradient(rgba(90,75,45,.05) .7px,transparent .9px),
-        radial-gradient(rgba(90,75,45,.035) .7px,transparent .8px);
-      background-size:22px 22px, 28px 28px;
-      background-position:0 0,11px 9px;
-      opacity:.7;
-      pointer-events:none;
-    }
-    .brand{
-      padding:16px 18px 14px;
-      min-height:120px;
-    }
-    .brand > *{position:relative;z-index:1}
-    .title{
-      margin:0;
-      font-family:"Segoe Print","Comic Sans MS",cursive;
-      font-size:clamp(2rem,3vw,2.75rem);
-      line-height:.9;
-      color:#2f4bb0;
-      letter-spacing:.5px;
-    }
-    .crayon-line{
-      height:10px;
-      margin:10px 0 12px;
-      border-radius:999px;
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
       background:
-        linear-gradient(90deg,
-          transparent 0 4%,
-          var(--green) 4% 48%,
-          var(--red) 48% 75%,
-          var(--yellow) 75% 95%,
-          transparent 95% 100%);
-      filter:saturate(.92);
-    }
-    .subtitle{
-      font-family:"Segoe Print","Comic Sans MS",cursive;
-      font-size:1rem;
-      opacity:.78;
-    }
-    .tiny-burger{
-      position:absolute;
-      right:16px;
-      top:16px;
-      width:82px;
-      height:82px;
-      filter:drop-shadow(0 6px 10px rgba(0,0,0,.12));
-    }
-    .controls{
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      gap:10px;
-      align-items:flex-start;
-    }
-    .chip{
-      padding:10px 14px;
-      font-weight:800;
-      font-size:.95rem;
-      border:2px solid rgba(54,49,33,.08);
-      user-select:none;
-    }
-    .toggle{
-      display:flex;
-      padding:6px;
-      gap:6px;
-      background:rgba(255,249,236,.9);
-    }
-    button{
-      border:none;
-      cursor:pointer;
-      font:inherit;
-      font-weight:800;
-      border-radius:999px;
-      padding:10px 14px;
-      color:var(--ink);
-      background:linear-gradient(180deg,#fffdf8,#f0ead9);
-      box-shadow:0 6px 16px rgba(25,30,40,.12);
-      transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
-    }
-    button:hover{transform:translateY(-1px)}
-    button:active{transform:translateY(1px) scale(.985)}
-    .lang-btn.active{
-      background:linear-gradient(180deg,#eef3ff,#dfe7ff);
-      color:#2a49b7;
-      outline:3px solid rgba(52,92,219,.2);
-    }
-    .speak-btn{
-      background:linear-gradient(180deg,#fff9ef,#ffe9be);
-      color:#7a5211;
-    }
-    .question-wrap{
-      display:flex;
-      justify-content:center;
-      align-items:flex-start;
-      padding-top:10px;
-    }
-    .question-card{
-      max-width:min(760px, calc(100vw - 36px));
-      width:100%;
-      text-align:center;
-      padding:18px 20px 16px;
-      border:3px solid rgba(45,61,115,.08);
-      background:rgba(255,251,244,.9);
-    }
-    .question-top{
-      font-size:.82rem;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      opacity:.58;
-      font-weight:900;
-    }
-    .question-main{
-      margin-top:8px;
-      font-size:clamp(1.5rem,3vw,2.45rem);
-      font-weight:900;
-      color:#2847ad;
-      line-height:1.06;
-    }
-    .question-sub{
-      margin-top:8px;
-      font-size:1rem;
-      font-weight:700;
-      opacity:.78;
-    }
-    .answers-wrap{
-      align-self:end;
-      display:grid;
-      grid-template-columns:sequence(null);repeat(4,minmax(0,1fr));
-      gap:14px;
-      padding-bottom:6px;
-    }
-    .answer-card{
-      border:3px solid rgba(55,47,25,.11);
-      padding:12px 12px 14px;
-      min-height:132px;
-      display:grid;
-      grid-template-rows:auto 1fr auto;
-      gap:10px;
-      cursor:pointer;
-      user-select:none;
-      transform-origin:center bottom;
-      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
-    }
-    .answer-card:hover{transform:translateY(-3px) rotate(-.2deg)}
-    .answer-card.correct{
-      border-color:rgba(58,157,89,.45);
-      background:rgba(237,255,241,.95);
-    }
-    .answer-card.wrong{
-      border-color:rgba(216,82,75,.42);
-      background:rgba(255,239,239,.95);
-      animation:shake .28s linear 1;
-    }
-    .answer-card.dim{opacity:.72}
-    .answer-scribble{
-      height:9px;
-      border-radius:999px;
-      opacity:.95;
-    }
-    .scribble-bun{background:linear-gradient(90deg,#8b63da 0 23%, #3156d9 23% 49%, #3f9d5b 49% 67%, #f1cf53 67% 84%, #d8524b 84% 100%)}
-    .scribble-salade{background:linear-gradient(90deg,transparent 0 10%, #3f9d5b 10% 90%, transparent 90% 100%)}
-    .scribble-viande{background:linear-gradient(90deg,transparent 0 6%, #6d4a2e 6% 94%, transparent 94% 100%)}
-    .scribble-fromage{background:linear-gradient(90deg,transparent 0 10%, #f1cf53 10% 90%, transparent 90% 100%)}
-    .answer-word{
-      font-family:"Segoe Print","Comic Sans MS",cursive;
-      font-size:clamp(1.1rem,2.2vw,1.5rem);
-      line-height:1.05;
-      font-weight:900;
-      color:#33447f;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-    }
-    .answer-helper{
-      text-align:center;
-      font-size:.84rem;
-      font-weight:800;
-      opacity:.68;
-    }
-    .corner-note{
-      position:absolute;
-      right:18px;
-      bottom:164px;
-      padding:11px 14px;
-      font-weight:900;
-      color:#2f4bb0;
-      border:2px solid rgba(47,75,176,.08);
-      pointer-events:none;
-    }
-    .love-note{
-      position:absolute;
-      left:50%;
-      transform:translateX(-50%);
-      bottom:118px;
-      font-family:"Segoe Print","Comic Sans MS",cursive;
-      font-size:1.35rem;
-      color:rgba(51,67,128,.62);
-      pointer-events:none;
-      white-space:nowrap;
-    }
-    .drawn-curve{
-      position:absolute;
-      right:76px;
-      bottom:132px;
-      width:94px;
-      height:34px;
-      pointer-events:none;
-    }
-    .hud{
-      position:absolute;
-      left:18px;
-      bottom:172px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      pointer-events:none;
-    }
-    .hud .chip{pointer-events:auto}
-    @keyframes shake{
-      0%{transform:translateX(0)}
-      25%{transform:translateX(-4px) rotate(-.4deg)}
-      50%{transform:translateX(4px) rotate(.4deg)}
-      75%{transform:translateX(-3px) rotate(-.3deg)}
-      100%{transform:translateX(0)}
-    }
-    @media (max-width:980px){
-      .answers-wrap{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .corner-note,.drawn-curve{display:none}
-      .love-note{bottom:104px;font-size:1.1rem}
-    }
-    @media (max-width:640px){
-      .ui{padding:12px}
-      .topbar{grid-template-columns:1fr}
-      .controls{justify-content:flex-start}
-      .question-wrap{padding-top:8px}
-      .question-card{padding:16px 14px 14px}
-      .answers-wrap{gap:10px;padding-bottom:4px}
-      .answer-card{min-height:112px;padding:10px}
-      .hud{left:12px;bottom:122px}
-      .love-note{display:none}
-    }
-  </style>
-</head>
-<body>
-  <div id="app">
-    <canvas id="scene"></canvas>
-
-    <div class="ui">
-      <div class="topbar">
-        <div class="card paper brand">
-          <h1 class="title">Le Burger</h1>
-          <div class="crayon-line"></div>
-          <div class="subtitle" id="subtitle">Pick the right answer and build the burger.</div>
-          <svg class="tiny-burger" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <ellipse cx="60" cy="36" rx="36" ry="18" fill="#ead0a7" stroke="#6d5a42" stroke-width="3"/>
-            <rect x="29" y="47" width="62" height="7" rx="4" fill="#3a9d59"/>
-            <rect x="26" y="54" width="68" height="8" rx="4" fill="#d8524b"/>
-            <rect x="30" y="63" width="60" height="7" rx="4" fill="#f0cf53"/>
-            <ellipse cx="60" cy="78" rx="38" ry="15" fill="#ead0a7" stroke="#6d5a42" stroke-width="3"/>
-          </svg>
-        </div>
-
-        <div class="controls">
-          <div class="chip toggle">
-            <button class="lang-btn active" id="frModeBtn">FR</button>
-            <button class="lang-btn" id="lvModeBtn">LV</button>
-          </div>
-          <button class="speak-btn" id="speakBtn">Speak</button>
-          <button id="restartBtn">Restart</button>
-        </div>
-      </div>
-
-      <div class="question-wrap">
-        <div class="question-card">
-          <div class="question-top" id="questionTop">Question 1</div>
-          <div class="question-main" id="questionMain">Trouve: maizīte</div>
-          <div class="question-sub" id="questionSub">Tap the correct card or the burger layer.</div>
-        </div>
-      </div>
-
-      <div class="answers-wrap" id="answers"></div>
-    </div>
-
-    <div class="hud">
-      <div class="chip" id="scoreChip">Score 0 / 0</div>
-      <div class="chip" id="streakChip">Streak 0</div>
-    </div>
-
-    <div class="corner-note" id="cornerNote">Tap the burger too 🍔</div>
-    <div class="love-note">J$adore le Burger</div>
-    <svg class="drawn-curve" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M8 26 C 22 10, 38 32, 54 20 S 85 12, 110 24" fill="none" stroke="#3a9d59" stroke-width="4" stroke-linecap="round"/>
-    </svg>
-  </div>
-
-  <script type="module">
-    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-
-    const WORDS = [
-      { id:'pain', fr:'pain', lv:'laaizīte', hintFr:'bun', hintLv:'bulciŉa', scribble:'scribble-bun', color:'#ead0a7' },
-      { id:'salade', fr:'salade', lv:'saláti', hintFr:&lettuce', hintLv:'saláti', scribble:'scribble-salade', color:'#3a9d59' },
-      { id:'viande', fr:'viande', lv:'^�1ſ��, hintFr:'meat', hintLv:'gaĻa', scribble:'scribble-viande', color:'#6d4a2e' },
-      { id:'fromage', fr:'fromage', lv:'siers', hintFr:'cheese', hintLv:'siers', scribble:'scribble-fromage', color:'#f0cf53' }
-    ];
-
-    const ui = {
-      answers: document.getElementById('answers'),
-      questionTop: document.getElementById('questionTop'),
-      questionMain: document.getElementById('questionMain'),
-      questionSub: document.getElementById('questionSub'),
-      subtitle: document.getElementById('subtitle'),
-      scoreChip: document.getElementById('scoreChip'),
-      streakChip: document.getElementById('streakChip'),
-      cornerNote: document.getElementById('cornerNote'),
-      speakBtn: document.getElementById('speakBtn'),
-      restartBtn: document.getElementById('restartBtn'),
-      frModeBtn: document.getElementById('frModeBtn'),
-      lvModeBtn: document.getElementById('lvModeBtn')
-    };
-
-    const state = {
-      answerLanguage:'fr',
-      order:['pain','salade','viande','fromage'],
-      index:0,
-      score:0,
-      attempts:0,
-      streak:0,
-      locked:false,
-      currentChoices:[]
-    };
-
-    function shuffle(list){
-      const copy = [...list];
-      for(let i = copy.length - 1; i > 0; i--){
-        const k = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
+        radial-gradient(circle at top, #d6ecff 0%, #c6e6ff 24%, #f7e9be 78%, #f2dca8 100%);
+      font-family: "Trebuchet MS", "Comic Sans MS", system-ui, sans-serif;
+      color: var(--ink);
+      touch-action: manipulation;
     }
 
-    function getWord(id){
-      return WORDS.find(item => item.id === id);
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(rgba(85, 65, 34, 0.06) 0.8px, transparent 0.9px),
+        radial-gradient(rgba(85, 65, 34, 0.03) 0.7px, transparent 0.8px);
+      background-size: 22px 22px, 31px 31px;
+      background-position: 0 0, 11px 13px;
+      opacity: 0.28;
     }
 
-    function getPromptEntry(){
-      return getWord(state.order[state.index]);
+    #app {
+      position: relative;
+      width: 100vw;
+      height: 100dvh;
+      overflow: hidden;
     }
 
-    function getPromptText(entry){
-      return state.answerLanguage === 'fr'
-        ? `Trouve: ${entry.lv}`
-        : `Atrodi: ${entry.fr}`;
+    canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
     }
 
-    function getQuestionSub(){
-      return state.answerLanguage === 'fr'
-        ? 'Choose the French word that matches the Latvian word.'
-        : 'Izülēlies latviešu vārdu, kas atbilst frančq vārdam.';
+    .ui {
+      position: absolute;
+      inset: 0;
+      padding:
+        calc(14px + env(safe-area-inset-top))
+        calc(14px + env(safe-area-inset-right))
+        calc(14px + env(safe-area-inset-bottom))
+        calc(14px + env(safe-area-inset-left));
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 12px;
+      pointer-events: none;
     }
 
-    function getAnswerLabel(entry){
-      return state.answerLanguage === 'fr' ? entry.fr : entry.lv;
+    .top-row,
+    .mission-row,
+    .tray-row,
+    .bottom-row {
+      position: relative;
+      z-index: 2;
+      pointer-events: none;
     }
 
-    function getAnswerHint(entry){
-      return state.answerLanguage === 'fr' ? entry.hintFr : entry.hintLv;
+    .top-row {
+      display: grid;
+      grid-template-columns: minmax(260px, 420px) auto;
+      align-items: start;
+      gap: 12px;
     }
 
-    function updateHud(){
-      ui.scoreChip.textContent = `Score ${state.score} / ${state.attempts}`;
-      ui.streakChip.textContent = `Streak ${state.streak}`;
+    .paper, .pill, .ingredient-btn, .modal {
+      position: relative;
+      pointer-events: auto;
+      border-radius: var(--radius);
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.72), rgba(255,255,255,0.18)),
+        linear-gradient(180deg, var(--paper), var(--paper-2));
+      box-shadow: var(--shadow);
+      border: 3px solid rgba(87, 68, 32, 0.10);
+      overflow: hidden;
     }
 
-    function updateLanguageButtons(){
-      ui.frModeBtn.classList.toggle('active', state.answerLanguage === 'fr');
-      ui.lvModeBtn.classList.toggle('active', state.answerLanguage === 'lv');
-      ui.subtitle.textContent = state.answerLanguage === 'fr'
-        ? 'Find the right French answer and build the burger.'
-        : 'Atrodi pareizo latviešu atbildi un uzcel burgeru.';
-      ui.cornerNote.textContent = state.answerLanguage === 'fr'
-        ? 'Tap the burger too 🍔'
-        : 'Spied ārī uz burgera 🍔';
-      ui.speakBtn.textContent = state.answerLanguage === 'fr' ? 'Speak' : 'Runāt';
-      ui.restartBtn.textContent = state.answerLanguage === 'fr' ? 'Restart' : 'Sākt no jauna';
+    .paper::before,
+    .ingredient-btn::before,
+    .modal::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(rgba(97, 77, 44, 0.06) 0.8px, transparent 1px),
+        radial-gradient(rgba(97, 77, 44, 0.04) 0.7px, transparent 0.8px);
+      background-size: 22px 22px, 29px 29px;
+      background-position: 0 0, 9px 10px;
+      opacity: 0.45;
     }
 
-    function speak(text){
-      if(!('speechSynthesis' in window)) return;
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = state.answerLanguage === 'fr' ? 'fr-FR' : 'lv-LV';
-      utter.rate = state.answerLanguage === 'fr' ? 0.92 : 0.95;
-      utter.pitch = 1.02;
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utter);
+    .brand-card {
+      padding: 14px 18px 12px;
+      min-height: 112px;
     }
 
-    function renderAnswers(){
-      ui.answers.innerHTML = '';
-      const target = getPromptEntry();
-      const others = shuffle(WORDS.filter(item => item.id !== target.id)).slice(0,3);
-      state.currentChoices = shuffle([target, ...others]);
+    .brand-card > * { position: relative; z-index: 1; }
 
-      state.currentChoices.forEach(entry => {
-        const card = document.createElement('button');
-        card.className = 'answer-card paper';
-        card.dataset.id = entry.id;
-        card.innerHTML = `
-          <div class="answer-scribble ${entry.scribble}"></div>
-          <div class="answer-word">${getAnswerLabel(entry)}</div>
-          <div class="answer-helper">${getAnswerHint(entry)}</div>
-        `;
-        card.addEventListener('click', () => handleGuess(entry.id, card, true));
-        ui.answers.appendChild(card);
-      });
+    .title {
+      margin: 0;
+      font-family: "Segoe Print", "Comic Sans MS", cursive;
+      font-size: clamp(2rem, 3vw, 2.9rem);
+      line-height: 0.92;
+      color: #2d4bb1;
+      letter-spacing: 0.5px;
     }
 
-    function renderQuestion(){
-      const target = getPromptEntry();
-      ui.questionTop.textContent = state.answerLanguage === 'fr'
-        ? `Question ${state.index + 1} • French`
-        : `Jautājums ${state.index + 1} • Latviski`;
-      ui.questionMain.textContent = getPromptText(target);
-      ui.questionSub.textContent = getQuestionSub();
-      renderAnswers();
-      focusBurgerLayer(target.id);
+    .subtitle {
+      margin-top: 8px;
+      font-family: "Segoe Print", "Comic Sans MS", cursive;
+      font-size: 0.98rem;
+      color: rgba(38, 51, 87, 0.78);
     }
 
-    function startGame(){
-      state.index = 0;
-      state.score = 0;
-      state.attempts = 0;
-      state.streak = 0;
-      state.locked = false;
-      updateHud();
-      updateLanguageButtons();
-      renderQuestion();
+    .crayon-line {
+      height: 10px;
+      border-radius: 999px;
+      margin: 10px 0 10px;
+      background: linear-gradient(90deg,
+        transparent 0%, transparent 4%,
+        var(--green) 4%, var(--green) 48%,
+        var(--red) 48%, var(--red) 72%,
+        var(--yellow) 72%, var(--yellow) 96%,
+        transparent 96%);
+      opacity: 0.95;
     }
 
-    function nextQuestion(){
-      state.index += 1;
-      state.locked = false;
-      if(state.index >= state.order.length){
-        state.index = 0;
-        state.order = shuffle(state.order);
-      }
-      renderQuestion();
+    .tiny-burger {
+      position: absolute;
+      right: 14px;
+      top: 14px;
+      width: 82px;
+      height: 82px;
+      filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.10));
     }
 
-    function markCards(correctId, clickedId){
-      [...ui.answers.children].forEach(card => {
-        const id = card.dataset.id;
-        if(id === correctId) card.classList.add('correct');
-        else if(id === clickedId) card.classList.add('wrong');
-        else card.classList.add('dim');
-      });
+    .control-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+      align-items: flex-start;
     }
 
-    function handleGuess(id, card = null, fromCard = false){
-      if(state.locked) return;
-      const target = getPromptEntry();
-      if(id === target.id){
-        state.locked = true;
-        state.attempts += 1;
-        state.score += 1;
-        state.streak += 1;
-        updateHud();
-        markCards(target.id, id);
-        bounceBurgerPiece(id, true);
-        if(fromCard) speak(getAnswerLabel(target));
-        ui.questionMain.textContent = state.answerLanguage === 'fr'
-          ? `Bravo! ${target.fr}`
-          : `Pareizi! ${target.lv}`;
-        ui.questionSub.textContent = state.answerLanguage === 'fr'
-          ? 'Great. Next ingredient coming up.'
-          : 'Lieliski. NĀkamā sastāvdaėba tūlīt būs klāt.';
-        setTimeout(nextQuestion, 950);
-      } else {
-        state.attempts += 1;
-        state.streak = 0;
-        updateHud();
-        bounceBurgerPiece(id, false);
-        if(card) card.classList.add('wrong');
-        ui.questionSub.textContent = state.answerLanguage === 'fr'
-          ? `Not this one. Try again for ${target.lv}.`
-          : `Nav pareizi. MēgĻini vēl reizi un atrodi ${target.fr}.`;
-      }
+    .toggle {
+      display: flex;
+      gap: 6px;
+      padding: 6px;
+      border-radius: 999px;
+      background: rgba(255, 250, 236, 0.92);
+      box-shadow: var(--shadow);
+      border: 2px solid rgba(71, 58, 28, 0.08);
+      pointer-events: auto;
     }
 
-    ui.frModeBtn.addEventListener('click', () => {
-      state.answerLanguage = 'fr';
-      updateLanguageButtons();
-      renderQuestion();
-    });
-
-    ui.lvModeBtn.addEventListener('click', () => {
-      state.answerLanguage = 'lv';
-      updateLanguageButtons();
-      renderQuestion();
-    });
-
-    ui.restartBtn.addEventListener('click', startGame);
-    ui.speakBtn.addEventListener('click', () => speak(getAnswerLabel(getPromptEntry())));
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xcfe8ff);
-    scene.fog = new THREE.Fog(0xcfe8ff, 12, 24);
-
-    const canvas = document.getElementById('scene');
-    const renderer = new THREE.WebGLRenderer( { canvas, antialias:true, alpha:false } );
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.shadowMap.enabled = true;
-
-    const camera = new THREE.PerspectiveCamera(36, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 2.1, 8.2);
-
-    const ambient = new THREE.AmbientLight(0xffffff, 1.35);
-    scene.add(ambient);
-
-    const sun = new THREE.DirectionalLight(0xffffff, 1.35);
-    sun.position.set(5, 8, 6);
-    sun.castShadow = true;
-    scene.add(sun);
-
-    const fill = new THREE.DirectionalLight(0xffefc4, 0.7);
-    fill.position.set(-6, 4, 4);
-    scene.add(fill);
-
-    const ground = new THREE.Mesh(
-      new THREE.CircleGeometry(7.5, 64),
-      new THREE.MeshStandardMaterial({ color:0xf0d7a3, roughness:1 })
-    );
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -1.75;
-    ground.receiveShadow = true;
-    scene.add(ground);
-
-    const rainbowRing = new THREE.Group();
-    scene.add(rainbowRing);
-    const ringSpecs = [
-      [0x7a56c7, 2.85, 0.035, -0.15],
-      [0x345cdb, 2.98, 0.035, -0.08],
-      [0x3a9d59, 3.11, 0.035,  0.0],
-      [0xf0cf53, 3.24, 0.035,  0.08],
-      [0xd8524b, 3.37, 0.035,  0.15]
-    ];
-    ringSpecs.forEach(([color,radius,tube,x]) => {
-      const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(radius, tube, 10, 100),
-        new THREE.MeshStandardMaterial({ color, roughness:0.7, metalness:0.05 })
-      );
-      ring.rotation.x = Math.PI / 2;
-      ring.position.set(x, -1.64, 0);
-      rainbowRing.add(ring);
-    });
-
-    const burgerGroup = new THREE.Group();
-    burgerGroup.position.y = -0.05;
-    scene.add(burgerGroup);
-
-    const clickable = [];
-    const originalScales = new Map();
-
-    function remember(mesh){
-      originalScales.set(mesh.uuid, mesh.scale.clone());
-      clickable.push(mesh);
-      return mesh;
+    button {
+      appearance: none;
+      border: none;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 11px 16px;
+      color: var(--ink);
+      background: linear-gradient(180deg, #fffdf8, #ede7d3);
+      box-shadow: 0 6px 14px rgba(36, 38, 52, 0.12);
+      transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
     }
 
-    function bunTop(){
-      const bun = new THREE.Mesh(
-        new THREE.SphereGeometry(1.72, 40, 40, 0, Math.PI * 2, 0, Math.PI / 2.05),
-        new THREE.MeshStandardMaterial({ color:0xe9c998, roughness:0.88 })
-      );
-      bun.scale.set(1, 0.82, 1);
-      bun.position.y = 1.02;
-      bun.castShadow = true;
-      bun.userData.wordId = 'pain';
-      return remember(bun);
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(1px) scale(0.985); }
+
+    .lang-btn.active,
+    .ghost-btn.active {
+      background: linear-gradient(180deg, #eef4ff, #dce8ff);
+      color: #2d4bb1;
+      outline: 3px solid rgba(53, 89, 216, 0.18);
     }
 
-    const bottomBun = new THREE.Mesh(
-      new THREE.CylinderGeometry(1.82, 1.96, 0.58, 40),
-      new THREE.MeshStandardMaterial({ color:0xe3c18f, roughness:0.92 })
-    );
-    bottomBun.position.y = -0.95;
-    bottomBun.castShadow = true;
-    bottomBun.receiveShadow = true;
-    bottomBun.userData.wordId = 'pain';
-    burgerGroup.add(remember(bottomBun));
-
-    const meat = new THREE.Mesh(
-      new THREE.CylinderGeometry(1.58, 1.72, 0.34, 40),
-      new THREE.MeshStandardMaterial({ color:0x6d4a2e, roughness:0.98 })
-    );
-    meat.position.y = -0.36;
-    meat.castShadow = true;
-    meat.userData.wordId = 'viande';
-    burgerGroup.add(remember(meat));
-
-    const cheese = new THREE.Mesh(
-      new THREE.BoxGeometry(2.38, 0.09, 2.38),
-      new THREE.MeshStandardMaterial({ color:0xf0cf53, roughness:0.9 })
-    );
-    cheese.position.y = -0.07;
-    cheese.rotation.y = Math.PI / 4;
-    cheese.castShadow = true;
-    cheese.userData.wordId = 'fromage';
-    burgerGroup.add(remember(cheese));
-
-    const lettuceShape = new THREE.Shape();
-    lettuceShape.moveTo(1.78, 0);
-    lettuceShape.bezierCurveTo(-1.2, 0.4, -0.7, -0.3, -0.1, 0.18);
-    lettuceShape.bezierCurveTo(0.3, 0.48, 0.95, -0.24, 1.52, 0.24);
-    lettuceShape.bezierCurveTo(1.75, 0.34, 1.96, 0.04, 1.85, -0.14);
-    lettuceShape.bezierCurveTo(1.25, -0.36, 0.5, 0.2, -0.18, -0.26);
-    lettuceShape.bezierCurveTo(-0.86, -0.56, -1.28, 0.22, -1.78, 0);
-
-    const lettuce = new THREE.Mesh(
-      new THREE.ExtrudeGeometry(lettuceShape, { depth:0.12, bevelEnabled:false }),
-      new THREE.MeshStandardMaterial({ color:0x3a9d59, roughness:0.98 })
-    );
-    lettuce.rotation.x = -Math.PI / 2;
-    lettuce.position.set(0, 0.17, 0.97);
-    lettuce.castShadow = true;
-    lettuce.userData.wordId = 'salade';
-    burgerGroup.add(remember(lettuce));
-
-    const top = bunTop();
-    burgerGroup.add(top);
-
-    const aura = new THREE.Mesh(
-      new THREE.TorusGeometry(2.35, 0.07, 12, 100),
-      new THREE.MeshStandardMaterial({ color:0xd8524b, roughness:0.58, emissive:0x5b1613 })
-    );
-    aura.rotation.x = Math.PI / 2;
-    aura.position.y = 0.05;
-    scene.add(aura);
-
-    const sesameGeo = new THREE.SphereGeometry(0.055, 10, 10);
-    for(let i=0;i<18;i++){
-      const seed = new THREE.Mesh(
-        sesameGeo,
-        new THREE.MeshStandardMaterial({ color:0xfff6da, roughness:0.95 })
-      );
-      const angle = Math.random() * Math.PI * 2;
-      const radius = 0.25 + Math.random() * 1.02;
-      seed.position.set(Math.cos(angle) * radius, 1.55 + Math.random() * 0.17, Math.sin(angle) * radius * 0.72);
-      seed.scale.set(1.2, 0.6, 1.5);
-      burgerGroup.add(seed);
+    .speak-btn {
+      background: linear-gradient(180deg, #fff9ea, #ffe7b9);
+      color: #7f560d;
+      pointer-events: auto;
     }
 
-    const floaters = [];
-    const floaterGeo = new THREE.SphereGeometry(0.09, 12, 12);
-    for(let i=0;i<24;i++){
-      const floater = new THREE.Mesh(
-        floaterGeo,
-        new THREE.MeshStandardMaterial({
-          color:new THREE.Color().setHSL(Math.random(), 0.7, 0.7),
-          roughness:0.55,
-          metalness:0.05
-        })
-      );
-      floater.position.set((Math.random() - 0.5) * 12, Math.random() * 6 - 1.2, (Math.random() - 0.5) * 7);
-      scene.add(floater);
-      floaters.push(floater);
+    .mission-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
     }
 
-    const raycaster = new THREE.Raycaster();
-    const pointer = new THREE.Vector2();
-    canvas.addEventListener('pointerdown', (event) => {
-      pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-      pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-      raycaster.setFromCamera(pointer, camera);
-      const hits = raycaster.intersectObjects(clickable, false);
-      if(hits.length){
-        const id = hits[0].object.userData.wordId;
-        handleGuess(id, null, true);
-      }
-    });
-
-    function focusBurgerLayer(wordId){
-      clickable.forEach(mesh => {
-        const base = originalScales.get(mesh.uuid);
-        if(!base) return;
-        mesh.scale.copy(base);
-        if(mesh.userData.wordId === wordId){
-          mesh.scale.multiplyScalar(1.04);
-        }
-      });
+    .mission-card {
+      width: min(780px, calc(100vw - 32px));
+      padding: 16px 20px 15px;
+      text-align: center;
     }
 
-    function bounceBurgerPiece(wordId, good){
-      clickable.forEach(mesh => {
-        if(mesh.userData.wordId !== wordId) return;
-        const base = originalScales.get(mesh.uuid);
-        if(!base) return;
-        mesh.scale.copy(base.clone().multiplyScalar(good ? 1.15 : 1.08));
-        setTimeout(() => {
-          const target = getPromptEntry();
-          if(target && mesh.userData.wordId === target.id){
-            mesh.scale.copy(base.clone().multiplyScalar(1.04));
-          } else {
-            mesh.scale.copy(base);
-          }
-        }, 220);
-      });
+    .mission-card > * { position: relative; z-index: 1; }
+
+    .mission-label {
+      font-size: 0.82rem;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      opacity: 0.62;
+      font-weight: 900;
     }
 
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    });
-
-    const clock = new THREE.Clock();
-    function animate(){
-      const t = clock.getElapsedTime();
-      burgerGroup.rotation.y = Math.sin(t * 0.6) * 0.24;
-      burgerGroup.position.y = -0.05 + Math.sin(t * 1.6) * 0.08;
-      aura.rotation.z += 0.006;
-      rainbowRing.rotation.z -= 0.0025;
-      lettuce.rotation.z = Math.sin(t * 2.3) * 0.08;
-      top.rotation.z = Math.sin(t * 1.1) * 0.03;
-
-      floaters.forEach((mesh, i) => {
-        mesh.position.y += Math.sin(t * 0.9 + i) * 0.002;
-        mesh.position.x += Math.cos(t * 0.6 + i * 0.5) * 0.0012;
-      });
-
-      const aspect = window.innerWidth / window.innerHeight;
-      camera.position.x = Math.sin(t * 0.25) * 0.18;
-      camera.position.z = aspect < 0.8 ? 9.1 : 8.2;
-      camera.lookAt(0, 0.15, 0);
-
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
+    .mission-main {
+      margin-top: 6px;
+      font-size: clamp(1.55rem, 3vw, 2.5rem);
+      line-height: 1.06;
+      font-weight: 900;
+      color: #2e4cb2;
     }
 
-    updateLanguageButtons();
-    startGame();
-    animate();
-  </script>
-</body>
-</html>
+    .mission-sub {
+      margin-top: 7px;
+      font-size: 1rem;
+      line-height: 1.35;
+      font-weight: 700;
+      opacity: 0.82;
+    }
+
+    .bottom-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .hud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .pill {
+      padding: 10px 14px;
+      font-weight: 900;
+      font-size: 0.95rem;
+      pointer-events: auto;
+    }
+
+    .corner-note {
+      padding: 10px 14px;
+      font-weight: 900;
+      color: #2f4bb2;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .tray-row {
+      align-self: end;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .ingredient-btn {
+      min-height: 124px;
+      padding: 10px 10px 12px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 8px;
+      text-align: center;
+      user-select: none;
+      transform-origin: center bottom;
+    }
+
+    .ingredient-btn > * { position: relative; z-index: 1; }
+
+    .ingredient-btn.correct {
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.76), rgba(255,255,255,0.20)),
+        linear-gradient(180deg, #f0fff1, #d9f6dc);
+      border-color: rgba(62, 160, 85, 0.35);
+    }
+
+    .ingredient-btn.wrong {
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.76), rgba(255,255,255,0.20)),
+        linear-gradient(180deg, #fff5f4, #ffe2df);
+      border-color: rgba(214, 83, 77, 0.34);
+    }
+
+    .ingredient-btn.dim {
+      opacity: 0.72;
+    }
+
+    .ingredient-s\�&ە�
