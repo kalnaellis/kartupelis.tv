@@ -1,0 +1,20 @@
+{
+  "name": "kartupelis.tv",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^9.0.0",
+    "@runwayml/avatars-react": "^0.1.0",
+    "@runwayml/sdk": "^0.1.0",
+    "next": "14.2.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "three": "^0.165.0"
+  }
+}
