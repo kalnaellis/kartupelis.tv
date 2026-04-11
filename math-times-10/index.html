@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10×10 Multiplication Mission</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="scene"></canvas>
+
+    <div class="ui-shell">
+      <header class="topbar card">
+        <div>
+          <h1>10×10 Mission</h1>
+          <p class="subtitle">A 10-step multiplication course with a full 10×10 map, memory tricks, and before-after testing.</p>
+        </div>
+        <div class="top-actions">
+          <div class="badge" id="stepBadge">Step 1 / 10</div>
+          <button id="backBtn">Back</button>
+          <button id="nextBtn" class="primary" disabled>Next</button>
+          <button id="restartBtn">Restart</button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="left-panel card">
+          <div class="kicker" id="stageKicker">Level 1</div>
+          <h2 id="stageTitle">Warm-up check</h2>
+          <p id="stageText">Let’s see what the student already knows before training the table.</p>
+
+          <div class="tip-box">
+            <div class="tip-label">Memory tip</div>
+            <div id="tipText">Answer first. Then watch where the fact lives on the 10×10 map.</div>
+          </div>
+
+          <div class="stats-row">
+            <div class="badge" id="correctBadge">Correct 0 / 0</div>
+            <div class="badge" id="streakBadge">Streak 0</div>
+            <div class="badge" id="compareBadge">Before 0 · After 0</div>
+            <div class="badge" id="timerBadge">Timer —</div>
+          </div>
+
+          <div class="prompt-card">
+            <div class="prompt-label">Task</div>
+            <div id="promptText" class="prompt-text">Solve: 3 × 4</div>
+          </div>
+
+          <div class="action-zone" id="actionZone"></div>
+
+          <div class="footnote">The floating cube wall behind the UI mirrors the full multiplication map.</div>
+        </section>
+
+        <section class="right-panel card">
+          <div class="grid-head">
+            <div class="grid-title">Multiplication map</div>
+            <div class="grid-note" id="gridNote">Rows × columns = answer</div>
+          </div>
+          <div class="grid-wrap">
+            <div class="table" id="table"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+    <div id="confetti" class="confetti"></div>
+
+    <div id="summaryModal" class="modal-wrap hidden">
+      <div class="modal card">
+        <h3 id="summaryTitle">Course complete!</h3>
+        <p id="summaryScore">You improved.</p>
+        <p id="summaryCopy">Run it again and beat the first score.</p>
+        <button id="summaryBtn" class="primary">Play again</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
